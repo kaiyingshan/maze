@@ -1,4 +1,11 @@
 
+function initiate() {
+    const ctx = document.getElementById('canvas').getContext('2d');
+    ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
+    ctx.font = '96px serif';
+    ctx.strokeText('Create your maze', 50, 250, 400);
+}
+
 // eslint-disable-next-line no-unused-vars
 function createMaze() {
     const n = parseInt(document.getElementById('rows').value, 10);
@@ -71,6 +78,7 @@ function createMaze() {
     console.time('render');
     const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
+
     ctx.fillStyle = 'black';
     ctx.beginPath();
     ctx.moveTo(x + t, y + t);
@@ -110,3 +118,5 @@ function createMaze() {
     console.timeEnd('render');
     return record;
 }
+
+window.onload = initiate();
