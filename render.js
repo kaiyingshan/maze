@@ -1,7 +1,8 @@
-createMaze(80);
-function createMaze(n) {
+
+function createMaze() {
+    const n = parseInt(document.getElementById('rows').value);
     if (n < 2) {
-        alert('too small');
+        alert('Bad input. DID YOU READ THE NODE??');
     }
     // initiate n * n nodes;
     let adjList = new Array(n * n);
@@ -74,6 +75,7 @@ function createMaze(n) {
 
     console.time('render');
     let ctx = document.getElementById('canvas').getContext('2d');
+    ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     ctx.fillStyle = 'black';
     ctx.beginPath();
     ctx.moveTo(x + t, y + t);
