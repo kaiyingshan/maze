@@ -2,7 +2,7 @@
 function createMaze() {
     const n = parseInt(document.getElementById('rows').value);
     if (n < 2) {
-        alert('Bad input. DID YOU READ THE NODE??');
+        alert('Bad input. DID YOU READ THE NOTE??');
     }
     // initiate n * n nodes;
     let adjList = new Array(n * n);
