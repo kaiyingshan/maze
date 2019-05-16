@@ -1,11 +1,12 @@
 
+// eslint-disable-next-line no-unused-vars
 function createMaze() {
-    const n = parseInt(document.getElementById('rows').value);
+    const n = parseInt(document.getElementById('rows').value, 10);
     if (n < 2) {
         alert('Bad input. DID YOU READ THE NOTE??');
     }
     // initiate n * n nodes;
-    let adjList = new Array(n * n);
+    const adjList = new Array(n * n);
 
     // create adjacency list
     for (let i = 0; i < n * n; i++) {
@@ -39,30 +40,24 @@ function createMaze() {
     const start = Math.floor(Math.random() * n * n) % (n * n);
 
     // set of known nodes; won't stop until its size is n * n
-    let knownNodes = new Set([start]);
+    const knownNodes = new Set([start]);
     console.time('spanning tree generation');
     // set of candidate vertex
     while (knownNodes.size !== n * n) {
         const knowns = Array.from(knownNodes.keys());
-        // let idx1 = Math.floor(Math.random() * knowns.length) % knowns.length; //possible optimization; use .next().value()
         let chosenNode = knowns[Math.floor(Math.random() * knowns.length) % knowns.length];
         let adj = adjList[chosenNode];
         let next = adj[Math.floor(Math.random() * adj.length) % adj.length];
 
-        let counter = 0;
         while (knownNodes.has(next)) {
             chosenNode = knowns[Math.floor(Math.random() * knowns.length) % knowns.length];
             adj = adjList[chosenNode];
             next = adj[Math.floor(Math.random() * adj.length) % adj.length];
-            counter++;
-            if (counter === knownNodes.size) { // this is not possible... but still want to ensure
-                break;
-            }
         }
         const tempArr = Array.from(record[chosenNode].keys());
         tempArr.push(next);
         record[chosenNode] = new Set(tempArr);
-        const tempArr2 = Array.from(record[next].keys())
+        const tempArr2 = Array.from(record[next].keys());
         tempArr2.push(chosenNode);
         record[next] = new Set(tempArr2);
         knownNodes.add(next);
@@ -74,7 +69,7 @@ function createMaze() {
     let y = 0;
 
     console.time('render');
-    let ctx = document.getElementById('canvas').getContext('2d');
+    const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     ctx.fillStyle = 'black';
     ctx.beginPath();
