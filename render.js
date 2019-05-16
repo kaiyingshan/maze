@@ -11,7 +11,7 @@ function createMaze() {
     const n = parseInt(document.getElementById('rows').value, 10);
     if (n < 2) {
         alert('DID YOU READ THE NOTE??');
-        return;
+        return 0;
     }
     // initiate n * n nodes;
     const adjList = new Array(n * n);
@@ -126,6 +126,8 @@ function createMaze() {
     }
     ctx.stroke();
     console.timeEnd('render');
+    return 0;
 }
+
 
 window.onload = initiate();
