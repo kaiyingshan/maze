@@ -10,7 +10,8 @@ function initiate() {
 function createMaze() {
     const n = parseInt(document.getElementById('rows').value, 10);
     if (n < 2) {
-        alert('Bad input. DID YOU READ THE NOTE??');
+        alert('DID YOU READ THE NOTE??');
+        return;
     }
     // initiate n * n nodes;
     const adjList = new Array(n * n);
@@ -40,8 +41,10 @@ function createMaze() {
     }
 
     // a new adjacency node for querying connected edges
-    const record = new Array(n * n);
-    record.fill(new Set());
+    const record = [];
+    for (let i = 0; i < n * n; i++) {
+        record[i] = [undefined, undefined, undefined, undefined];
+    }
 
     // pick a random node
     const start = Math.floor(Math.random() * n * n) % (n * n);
@@ -61,12 +64,19 @@ function createMaze() {
             adj = adjList[chosenNode];
             next = adj[Math.floor(Math.random() * adj.length) % adj.length];
         }
-        const tempArr = Array.from(record[chosenNode].keys());
-        tempArr.push(next);
-        record[chosenNode] = new Set(tempArr);
-        const tempArr2 = Array.from(record[next].keys());
-        tempArr2.push(chosenNode);
-        record[next] = new Set(tempArr2);
+
+        for (let i = 0; i < 4; i++) {
+            if (record[chosenNode][i] === undefined) {
+                record[chosenNode][i] = next;
+                break;
+            }
+        }
+        for (let i = 0; i < 4; i++) {
+            if (record[next][i] === undefined) {
+                record[next][i] = chosenNode;
+                break;
+            }
+        }
         knownNodes.add(next);
     }
     console.timeEnd('spanning tree generation');
@@ -90,24 +100,24 @@ function createMaze() {
         if ((i + 1) % n === 0 && i >= n * (n - 1)) {
             continue;
         } else if ((i + 1) % n === 0) { // if right
-            if (!record[i].has(i + n)) {
+            if (record[i].indexOf(i + n) === -1) {
                 ctx.lineTo(x - t, y);
             }
             ctx.moveTo(t, y + t);
             x = t;
             y += t;
         } else if (i >= n * (n - 1)) { // if bottom
-            if (!record[i].has(i + 1)) {
+            if (record[i].indexOf(i + 1) === -1) {
                 ctx.lineTo(x, y - t);
             }
             ctx.moveTo(x + t, y);
             x += t;
         } else {
-            if (!record[i].has(i + n)) {
+            if (record[i].indexOf(i + n) === -1) {
                 ctx.lineTo(x - t, y);
             }
             ctx.moveTo(x, y);
-            if (!record[i].has(i + 1)) {
+            if (record[i].indexOf(i + 1) === -1) {
                 ctx.lineTo(x, y - t);
             }
             ctx.moveTo(x + t, y);
@@ -116,7 +126,6 @@ function createMaze() {
     }
     ctx.stroke();
     console.timeEnd('render');
-    return record;
 }
 
 window.onload = initiate();
