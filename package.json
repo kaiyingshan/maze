@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "A maze generating and rendering tool.",
   "main": "render.js",
-  "dependencies": {},
+  "dependencies": {
+    "jquery": "^3.4.1"
+  },
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",

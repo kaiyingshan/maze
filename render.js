@@ -43,7 +43,7 @@ function createMaze() {
     // a new adjacency node for querying connected edges
     const record = [];
     for (let i = 0; i < n * n; i++) {
-        record[i] = [undefined, undefined, undefined, undefined];
+        record[i] = [-1, -1, -1, -1];
     }
 
     // pick a random node
@@ -66,13 +66,13 @@ function createMaze() {
         }
 
         for (let i = 0; i < 4; i++) {
-            if (record[chosenNode][i] === undefined) {
+            if (record[chosenNode][i] === -1) {
                 record[chosenNode][i] = next;
                 break;
             }
         }
         for (let i = 0; i < 4; i++) {
-            if (record[next][i] === undefined) {
+            if (record[next][i] === -1) {
                 record[next][i] = chosenNode;
                 break;
             }
@@ -88,6 +88,32 @@ function createMaze() {
     console.time('render');
     const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
+
+    const delta = 255 / n;
+    let r = 255;
+    let g = 77;
+    let b = 77;
+
+    const stack = [start];
+    const visited = new Array(n * n);
+    visited.fill(false);
+    let curNode = start;
+
+    while (stack.length !== 0) {
+        curNode = stack.pop();
+        visited[curNode] = true;
+        stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
+        ctx.fillStyle = `rgb(${g}, ${b}, ${r})`;
+        ctx.fillRect((curNode % n) * t, Math.floor(curNode / n) * t, t, t);
+        r += delta;
+        g += delta;
+        b += delta;
+        if (r > 200 && g > 200 && b > 200) {
+            r = 255;
+            g = 77;
+            b = 77;
+        }
+    }
 
     ctx.fillStyle = 'black';
     ctx.beginPath();
