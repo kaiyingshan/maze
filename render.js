@@ -6,8 +6,55 @@ function initiate() {
     ctx.strokeText('Create your maze', 50, 250, 400);
 }
 
+// acknowledgement: this function is derived from an article on CSS tricks
+function RGBtoHSL(rgbColor) {
+    let rgb = rgbColor;
+    while (rgb.length < 7) {
+        rgb += '0';
+    }
+    let r = parseInt(rgb.substring(1, 3), 16);
+    let g = parseInt(rgb.substring(3, 5), 16);
+    let b = parseInt(rgb.substring(5, 7), 16);
+    // Make r, g, and b fractions of 1
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    // Find greatest and smallest channel values
+    const cmin = Math.min(r, g, b);
+    const cmax = Math.max(r, g, b);
+    const delta = cmax - cmin;
+    let h = 0;
+    let s = 0;
+    let l = 0;
+
+    if (delta === 0) { h = 0; }
+    // Red is max
+    else if (cmax === r) { h = ((g - b) / delta) % 6; }
+    // Green is max
+    else if (cmax === g) { h = (b - r) / delta + 2; }
+    // Blue is max
+    else { h = (r - g) / delta + 4; }
+
+    h = Math.round(h * 60);
+
+    // Make negative hues positive behind 360°
+    if (h < 0) { h += 360; }
+
+    l = (cmax + cmin) / 2;
+
+    // Calculate saturation
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+    // Multiply l and s by 100
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return [h, s, l];
+}
+
 // eslint-disable-next-line no-unused-vars
-function createMaze() {
+function createMaze(colored, color) {
     const n = parseInt(document.getElementById('rows').value, 10);
     if (n < 2) {
         alert('DID YOU READ THE NOTE??');
@@ -89,29 +136,28 @@ function createMaze() {
     const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
 
-    const delta = 255 / n;
-    let r = 255;
-    let g = 77;
-    let b = 77;
+    if (colored) {
+        const delta = 100 / n;
+        const h = color[0];
+        const s = color[1];
+        let l = color[2];
+        const originalL = l;
 
-    const stack = [start];
-    const visited = new Array(n * n);
-    visited.fill(false);
-    let curNode = start;
+        const stack = [start];
+        const visited = new Array(n * n);
+        visited.fill(false);
+        let curNode = start;
 
-    while (stack.length !== 0) {
-        curNode = stack.pop();
-        visited[curNode] = true;
-        stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
-        ctx.fillStyle = `rgb(${g}, ${b}, ${r})`;
-        ctx.fillRect((curNode % n) * t, Math.floor(curNode / n) * t, t, t);
-        r += delta;
-        g += delta;
-        b += delta;
-        if (r > 200 && g > 200 && b > 200) {
-            r = 255;
-            g = 77;
-            b = 77;
+        while (stack.length !== 0) {
+            curNode = stack.pop();
+            visited[curNode] = true;
+            stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
+            ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
+            ctx.fillRect((curNode % n) * t, Math.floor(curNode / n) * t, t, t);
+            l += delta;
+            if (l > 100) {
+                l = originalL;
+            }
         }
     }
 
@@ -152,7 +198,34 @@ function createMaze() {
     }
     ctx.stroke();
     console.timeEnd('render');
+
     return 0;
+}
+
+// eslint-disable-next-line no-unused-vars
+function preprocess() {
+    const radios = document.getElementsByName('color');
+    let colored = false;
+    if (radios[0].checked) {
+        colored = true;
+    }
+
+    if (colored) {
+        const color = RGBtoHSL(document.getElementById('colorInput').value);
+        createMaze(true, color);
+    } else {
+        createMaze(false);
+    }
+}
+
+// eslint-disable-next-line no-unused-vars
+function showAndHide() {
+    const radios = document.getElementsByName('color');
+    if (radios[0].checked) {
+        $('#colorInput').show();
+    } else {
+        $('#colorInput').hide();
+    }
 }
 
 
