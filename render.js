@@ -75,8 +75,7 @@ function makeAdjList(rawList, n, ratio, offset) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function createMaze(colored, color) {
-    const heartShaped = true;
+function createMaze(colored, color, heartShaped) {
     const n = parseInt(document.getElementById('rows').value, 10);
 
     const ratio = 3.5 / n;
@@ -210,6 +209,17 @@ function createMaze(colored, color) {
     y += t;
     // every time move to the right bottom of its next cell and set the value
     for (let i = 0; i < n * n; i++) {
+        if (heartShaped && insideHeartCurve(i, ...consts)) {
+            ctx.moveTo(x - t, y - t);
+            if (!insideHeartCurve(i - 1, ...consts)) {
+                ctx.lineTo(x - t, y);
+            }
+            ctx.moveTo(x - t, y - t);
+            if (!insideHeartCurve(i - n, ...consts)) {
+                ctx.lineTo(x, y - t);
+            }
+            ctx.moveTo(x, y);
+        }
         // if right and bottom
         if ((i + 1) % n === 0 && i >= n * (n - 1)) {
             continue;
@@ -256,21 +266,20 @@ function preprocess() {
         colored = true;
     }
 
-    if (colored) {
-        const color = RGBtoHSL(document.getElementById('colorInput').value);
-        createMaze(true, color);
-    } else {
-        createMaze(false);
-    }
+    const heartShaped = document.getElementById('heartShaped').checked;
+
+    const color = RGBtoHSL(document.getElementById('colorInput').value);
+
+    createMaze(colored, color, heartShaped);
 }
 
 // eslint-disable-next-line no-unused-vars
 function showAndHide() {
     const radios = document.getElementsByName('color');
     if (radios[0].checked) {
-        $('#colorInput').show();
+        $('#colorSelection').show();
     } else {
-        $('#colorInput').hide();
+        $('#colorSelection').hide();
     }
 }
 
