@@ -6,7 +6,10 @@ function initiate() {
     ctx.strokeText('Create your maze', 50, 250, 400);
 }
 
-// acknowledgement: this function is derived from an article on CSS tricks
+/**
+ * acknowledgement: referred to https://css-tricks.com/
+ * converting-color-spaces-in-javascript/
+ */
 function RGBtoHSL(rgbColor) {
     let rgb = rgbColor;
     while (rgb.length < 7) {
@@ -56,7 +59,7 @@ function RGBtoHSL(rgbColor) {
 // eslint-disable-next-line no-unused-vars
 function createMaze(colored, color) {
     const n = parseInt(document.getElementById('rows').value, 10);
-    if (n < 2) {
+    if (n < 1) {
         alert('DID YOU READ THE NOTE??');
         return 0;
     }
