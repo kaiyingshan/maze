@@ -31,11 +31,11 @@ function RGBtoHSL(rgbColor) {
     let s = 0;
     let l = 0;
 
-    if (delta === 0) { h = 0; }
+    if (delta === 0) h = 0;
     // Red is max
-    else if (cmax === r) { h = ((g - b) / delta) % 6; }
+    else if (cmax === r) h = ((g - b) / delta) % 6;
     // Green is max
-    else if (cmax === g) { h = (b - r) / delta + 2; }
+    else if (cmax === g) h = (b - r) / delta + 2;
     // Blue is max
     else { h = (r - g) / delta + 4; }
 
@@ -104,19 +104,25 @@ function createMaze(colored, color) {
         } else if (i === n - 1) { // right top
             adjList[i] = heartShaped ? makeAdjList([i - 1, i + n], ...consts) : [i - 1, i + n];
         } else if (i === n * (n - 1)) { // left bottom
-            adjList[i] = makeAdjList([i - n, i + 1], ...adjList);
+            adjList[i] = heartShaped ? makeAdjList([i - n, i + 1], ...consts) : [i - n, i + 1];
         } else if (i === n * n - 1) { // right bottom
-            adjList[i] = makeAdjList([i - n, i - 1], ...consts);
+            adjList[i] = heartShaped ? makeAdjList([i - n, i - 1], ...consts) : [i - n, i - 1];
         } else if (i < n) { // first row
-            adjList[i] = makeAdjList([i - 1, i + 1, i + n], ...consts);
+            adjList[i] = heartShaped
+                ? makeAdjList([i - 1, i + 1, i + n], ...consts) : [i - 1, i + 1, i + n];
         } else if (i % n === 0) { // left col
-            adjList[i] = makeAdjList([i - n, i + 1, i + n], ...consts);
+            adjList[i] = heartShaped
+                ? makeAdjList([i - n, i + 1, i + n], ...consts) : [i - n, i + 1, i + n];
         } else if ((i + 1) % n === 0) { // right col
-            adjList[i] = makeAdjList([i - n, i - 1, i + n], ...consts);
+            adjList[i] = heartShaped
+                ? makeAdjList([i - n, i - 1, i + n], ...consts) : [i - n, i - 1, i + n];
         } else if (i > n * (n - 1)) { // bottom row
-            adjList[i] = makeAdjList([i - 1, i - n, i + 1], ...consts);
+            adjList[i] = heartShaped
+                ? makeAdjList([i - 1, i - n, i + 1], ...consts) : [i - 1, i - n, i + 1];
         } else {
-            adjList[i] = makeAdjList([i - 1, i + n, i + 1, i - n], ...consts);
+            adjList[i] = heartShaped
+                ? makeAdjList([i - 1, i + n, i + 1, i - n], ...consts)
+                : [i - 1, i + n, i + 1, i - n];
         }
     }
 
@@ -208,24 +214,28 @@ function createMaze(colored, color) {
         if ((i + 1) % n === 0 && i >= n * (n - 1)) {
             continue;
         } else if ((i + 1) % n === 0) { // if right
-            if (record[i].indexOf(i + n) === -1 && (!heartShaped || insideHeartCurve(i, ...consts))) {
+            if (record[i].indexOf(i + n) === -1
+            && (!heartShaped || insideHeartCurve(i, ...consts))) {
                 ctx.lineTo(x - t, y);
             }
             ctx.moveTo(t, y + t);
             x = t;
             y += t;
         } else if (i >= n * (n - 1)) { // if bottom
-            if (record[i].indexOf(i + 1) === -1 && (!heartShaped || insideHeartCurve(i, ...consts))) {
+            if (record[i].indexOf(i + 1) === -1
+            && (!heartShaped || insideHeartCurve(i, ...consts))) {
                 ctx.lineTo(x, y - t);
             }
             ctx.moveTo(x + t, y);
             x += t;
         } else {
-            if (record[i].indexOf(i + n) === -1 && (!heartShaped || insideHeartCurve(i, ...consts))) {
+            if (record[i].indexOf(i + n) === -1
+            && (!heartShaped || insideHeartCurve(i, ...consts))) {
                 ctx.lineTo(x - t, y);
             }
             ctx.moveTo(x, y);
-            if (record[i].indexOf(i + 1) === -1 && (!heartShaped || insideHeartCurve(i, ...consts))) {
+            if (record[i].indexOf(i + 1) === -1
+            && (!heartShaped || insideHeartCurve(i, ...consts))) {
                 ctx.lineTo(x, y - t);
             }
             ctx.moveTo(x + t, y);
