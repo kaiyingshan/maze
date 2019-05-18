@@ -56,9 +56,33 @@ function RGBtoHSL(rgbColor) {
     return [h, s, l];
 }
 
+function insideHeartCurve(i, n, ratio, offset) {
+    const x = ((i % n) - offset) * ratio;
+    const y = (Math.floor(i / n) - offset) * ratio;
+    // console.log(`${i} ${x} ${y}`);
+    // console.log((((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3));
+    return -1 * (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) > 0;
+}
+
+function makeAdjList(rawList, n, ratio, offset) {
+    const result = [];
+    for (let i = 0; i < rawList.length; i++) {
+        if (insideHeartCurve(rawList[i], n, ratio, offset)) {
+            result.push(rawList[i]);
+        }
+    }
+    return result;
+}
+
 // eslint-disable-next-line no-unused-vars
 function createMaze(colored, color) {
+    const heartShaped = true;
     const n = parseInt(document.getElementById('rows').value, 10);
+
+    const ratio = 3.5 / n;
+    const offset = n / 2;
+    const consts = [n, ratio, offset];
+
     if (n < 1) {
         alert('DID YOU READ THE NOTE??');
         return 0;
@@ -66,27 +90,33 @@ function createMaze(colored, color) {
     // initiate n * n nodes;
     const adjList = new Array(n * n);
 
+    let counter = 0;
     // create adjacency list
     for (let i = 0; i < n * n; i++) {
+        if (heartShaped && !insideHeartCurve(i, n, ratio, offset)) {
+            adjList[i] = [];
+            continue;
+        }
+        counter++;
         // 9 situations
         if (i === 0) { // left top
-            adjList[i] = [1, n];
+            adjList[i] = heartShaped ? makeAdjList([1, n], ...consts) : [1, n];
         } else if (i === n - 1) { // right top
-            adjList[i] = [i - 1, i + n];
+            adjList[i] = heartShaped ? makeAdjList([i - 1, i + n], ...consts) : [i - 1, i + n];
         } else if (i === n * (n - 1)) { // left bottom
-            adjList[i] = [i - n, i + 1];
+            adjList[i] = makeAdjList([i - n, i + 1], ...adjList);
         } else if (i === n * n - 1) { // right bottom
-            adjList[i] = [i - n, i - 1];
+            adjList[i] = makeAdjList([i - n, i - 1], ...consts);
         } else if (i < n) { // first row
-            adjList[i] = [i - 1, i + 1, i + n];
+            adjList[i] = makeAdjList([i - 1, i + 1, i + n], ...consts);
         } else if (i % n === 0) { // left col
-            adjList[i] = [i - n, i + 1, i + n];
+            adjList[i] = makeAdjList([i - n, i + 1, i + n], ...consts);
         } else if ((i + 1) % n === 0) { // right col
-            adjList[i] = [i - n, i - 1, i + n];
+            adjList[i] = makeAdjList([i - n, i - 1, i + n], ...consts);
         } else if (i > n * (n - 1)) { // bottom row
-            adjList[i] = [i - 1, i - n, i + 1];
+            adjList[i] = makeAdjList([i - 1, i - n, i + 1], ...consts);
         } else {
-            adjList[i] = [i - 1, i + n, i + 1, i - n];
+            adjList[i] = makeAdjList([i - 1, i + n, i + 1, i - n], ...consts);
         }
     }
 
@@ -97,13 +127,16 @@ function createMaze(colored, color) {
     }
 
     // pick a random node
-    const start = Math.floor(Math.random() * n * n) % (n * n);
+    let start = Math.floor(Math.random() * n * n) % (n * n);
 
+    while (heartShaped && !insideHeartCurve(start, ...consts)) {
+        start = Math.floor(Math.random() * n * n) % (n * n);
+    }
     // set of known nodes; won't stop until its size is n * n
     const knownNodes = new Set([start]);
     console.time('spanning tree generation');
     // set of candidate vertex
-    while (knownNodes.size !== n * n) {
+    while (knownNodes.size !== counter) {
         const knowns = Array.from(knownNodes.keys());
         let chosenNode = knowns[Math.floor(Math.random() * knowns.length) % knowns.length];
         let adj = adjList[chosenNode];
@@ -175,24 +208,24 @@ function createMaze(colored, color) {
         if ((i + 1) % n === 0 && i >= n * (n - 1)) {
             continue;
         } else if ((i + 1) % n === 0) { // if right
-            if (record[i].indexOf(i + n) === -1) {
+            if (record[i].indexOf(i + n) === -1 && (!heartShaped || insideHeartCurve(i, ...consts))) {
                 ctx.lineTo(x - t, y);
             }
             ctx.moveTo(t, y + t);
             x = t;
             y += t;
         } else if (i >= n * (n - 1)) { // if bottom
-            if (record[i].indexOf(i + 1) === -1) {
+            if (record[i].indexOf(i + 1) === -1 && (!heartShaped || insideHeartCurve(i, ...consts))) {
                 ctx.lineTo(x, y - t);
             }
             ctx.moveTo(x + t, y);
             x += t;
         } else {
-            if (record[i].indexOf(i + n) === -1) {
+            if (record[i].indexOf(i + n) === -1 && (!heartShaped || insideHeartCurve(i, ...consts))) {
                 ctx.lineTo(x - t, y);
             }
             ctx.moveTo(x, y);
-            if (record[i].indexOf(i + 1) === -1) {
+            if (record[i].indexOf(i + 1) === -1 && (!heartShaped || insideHeartCurve(i, ...consts))) {
                 ctx.lineTo(x, y - t);
             }
             ctx.moveTo(x + t, y);
