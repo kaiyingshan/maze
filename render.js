@@ -59,8 +59,6 @@ function RGBtoHSL(rgbColor) {
 function insideHeartCurve(i, n, ratio, offset) {
     const x = ((i % n) - offset) * ratio;
     const y = (Math.floor(i / n) - offset) * ratio;
-    // console.log(`${i} ${x} ${y}`);
-    // console.log((((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3));
     return -1 * (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) > 0;
 }
 
@@ -94,7 +92,7 @@ function render() {
     let y = 0;
     const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
-
+    console.time('render');
     if (colored) {
         const mul = parseInt(document.getElementById('colorRange').value, 10);
         const delta = mul * 2 / n;
@@ -172,6 +170,7 @@ function render() {
         }
     }
     ctx.stroke();
+    console.timeEnd('render');
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -283,14 +282,8 @@ function createMaze(colored, heartShaped) {
 // eslint-disable-next-line no-unused-vars
 function preprocess() {
     const radios = document.getElementsByName('color');
-    let colored = false;
-    if (radios[0].checked) {
-        colored = true;
-    }
-
+    const colored = radios[0].checked;
     const heartShaped = document.getElementById('heartShaped').checked;
-
-    // const color = RGBtoHSL(document.getElementById('colorInput').value);
 
     createMaze(colored, heartShaped);
 }
