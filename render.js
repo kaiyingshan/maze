@@ -306,4 +306,4 @@ function showAndHide() {
 }
 
 
-window.onload = initiate();
+window.onload = initiate;
