@@ -83,6 +83,8 @@ let cacheObj = {
     n: '',
 };
 
+// eslint-disable-next-line
+let created = false;
 
 function render() {
     const {
