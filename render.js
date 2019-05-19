@@ -74,8 +74,108 @@ function makeAdjList(rawList, n, ratio, offset) {
     return result;
 }
 
+let cacheObj = {
+    record: '',
+    colored: '',
+    heartShaped: '',
+    consts: '',
+    start: '',
+    n: '',
+};
+
+
+function render() {
+    const {
+        record, colored, heartShaped, consts, start, n,
+    } = cacheObj;
+    const color = RGBtoHSL(document.getElementById('colorInput').value);
+    const t = 500 / n;
+    let x = 0;
+    let y = 0;
+    const ctx = document.getElementById('canvas').getContext('2d');
+    ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
+
+    if (colored) {
+        const mul = parseInt(document.getElementById('colorRange').value, 10);
+        const delta = mul * 2 / n;
+        const h = color[0];
+        const s = color[1];
+        let l = color[2];
+        const originalL = l;
+
+        const stack = [start];
+        const visited = new Array(n * n);
+        visited.fill(false);
+        let curNode = start;
+
+        while (stack.length !== 0) {
+            curNode = stack.pop();
+            visited[curNode] = true;
+            stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
+            ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
+            ctx.fillRect((curNode % n) * t, Math.floor(curNode / n) * t, t, t);
+            l += delta;
+            if (l > 100) {
+                l = originalL;
+            }
+        }
+    }
+
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.moveTo(x + t, y + t);
+    x += t;
+    y += t;
+    // every time move to the right bottom of its next cell and set the value
+    for (let i = 0; i < n * n; i++) {
+        if (heartShaped && insideHeartCurve(i, ...consts)) {
+            ctx.moveTo(x - t, y - t);
+            if (!insideHeartCurve(i - 1, ...consts)) {
+                ctx.lineTo(x - t, y);
+            }
+            ctx.moveTo(x - t, y - t);
+            if (!insideHeartCurve(i - n, ...consts)) {
+                ctx.lineTo(x, y - t);
+            }
+            ctx.moveTo(x, y);
+        }
+        // if right and bottom
+        if ((i + 1) % n === 0 && i >= n * (n - 1)) {
+            continue;
+        } else if ((i + 1) % n === 0) { // if right
+            if (record[i].indexOf(i + n) === -1
+                && (!heartShaped || insideHeartCurve(i, ...consts))) {
+                ctx.lineTo(x - t, y);
+            }
+            ctx.moveTo(t, y + t);
+            x = t;
+            y += t;
+        } else if (i >= n * (n - 1)) { // if bottom
+            if (record[i].indexOf(i + 1) === -1
+                && (!heartShaped || insideHeartCurve(i, ...consts))) {
+                ctx.lineTo(x, y - t);
+            }
+            ctx.moveTo(x + t, y);
+            x += t;
+        } else {
+            if (record[i].indexOf(i + n) === -1
+                && (!heartShaped || insideHeartCurve(i, ...consts))) {
+                ctx.lineTo(x - t, y);
+            }
+            ctx.moveTo(x, y);
+            if (record[i].indexOf(i + 1) === -1
+                && (!heartShaped || insideHeartCurve(i, ...consts))) {
+                ctx.lineTo(x, y - t);
+            }
+            ctx.moveTo(x + t, y);
+            x += t;
+        }
+    }
+    ctx.stroke();
+}
+
 // eslint-disable-next-line no-unused-vars
-function createMaze(colored, color, heartShaped) {
+function createMaze(colored, heartShaped) {
     const n = parseInt(document.getElementById('rows').value, 10);
 
     const ratio = 3.5 / n;
@@ -168,93 +268,11 @@ function createMaze(colored, color, heartShaped) {
         knownNodes.add(next);
     }
     console.timeEnd('spanning tree generation');
-    // draw on canvas based on record;
-    const t = 500 / n;
-    let x = 0;
-    let y = 0;
 
-    console.time('render');
-    const ctx = document.getElementById('canvas').getContext('2d');
-    ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
-
-    if (colored) {
-        const delta = 100 / n;
-        const h = color[0];
-        const s = color[1];
-        let l = color[2];
-        const originalL = l;
-
-        const stack = [start];
-        const visited = new Array(n * n);
-        visited.fill(false);
-        let curNode = start;
-
-        while (stack.length !== 0) {
-            curNode = stack.pop();
-            visited[curNode] = true;
-            stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
-            ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
-            ctx.fillRect((curNode % n) * t, Math.floor(curNode / n) * t, t, t);
-            l += delta;
-            if (l > 100) {
-                l = originalL;
-            }
-        }
-    }
-
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.moveTo(x + t, y + t);
-    x += t;
-    y += t;
-    // every time move to the right bottom of its next cell and set the value
-    for (let i = 0; i < n * n; i++) {
-        if (heartShaped && insideHeartCurve(i, ...consts)) {
-            ctx.moveTo(x - t, y - t);
-            if (!insideHeartCurve(i - 1, ...consts)) {
-                ctx.lineTo(x - t, y);
-            }
-            ctx.moveTo(x - t, y - t);
-            if (!insideHeartCurve(i - n, ...consts)) {
-                ctx.lineTo(x, y - t);
-            }
-            ctx.moveTo(x, y);
-        }
-        // if right and bottom
-        if ((i + 1) % n === 0 && i >= n * (n - 1)) {
-            continue;
-        } else if ((i + 1) % n === 0) { // if right
-            if (record[i].indexOf(i + n) === -1
-            && (!heartShaped || insideHeartCurve(i, ...consts))) {
-                ctx.lineTo(x - t, y);
-            }
-            ctx.moveTo(t, y + t);
-            x = t;
-            y += t;
-        } else if (i >= n * (n - 1)) { // if bottom
-            if (record[i].indexOf(i + 1) === -1
-            && (!heartShaped || insideHeartCurve(i, ...consts))) {
-                ctx.lineTo(x, y - t);
-            }
-            ctx.moveTo(x + t, y);
-            x += t;
-        } else {
-            if (record[i].indexOf(i + n) === -1
-            && (!heartShaped || insideHeartCurve(i, ...consts))) {
-                ctx.lineTo(x - t, y);
-            }
-            ctx.moveTo(x, y);
-            if (record[i].indexOf(i + 1) === -1
-            && (!heartShaped || insideHeartCurve(i, ...consts))) {
-                ctx.lineTo(x, y - t);
-            }
-            ctx.moveTo(x + t, y);
-            x += t;
-        }
-    }
-    ctx.stroke();
-    console.timeEnd('render');
-
+    cacheObj = {
+        record, colored, heartShaped, consts, start, n,
+    };
+    render();
     return 0;
 }
 
@@ -268,9 +286,9 @@ function preprocess() {
 
     const heartShaped = document.getElementById('heartShaped').checked;
 
-    const color = RGBtoHSL(document.getElementById('colorInput').value);
+    // const color = RGBtoHSL(document.getElementById('colorInput').value);
 
-    createMaze(colored, color, heartShaped);
+    createMaze(colored, heartShaped);
 }
 
 // eslint-disable-next-line no-unused-vars

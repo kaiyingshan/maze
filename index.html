@@ -10,7 +10,8 @@
 <body>
     <input type="radio" name="color" checked onchange="showAndHide()"> Colored (Using DFS)<br>
     <input type="radio" name="color" onchange="showAndHide()"> Not Colored<br>
-    <div id="colorSelection">Change color <input id="colorInput" type="color"><br></div>
+    <div id="colorSelection" style="background-color: cadetblue;width:500px">Change color <input id="colorInput" type="color" onchange="render()"> &nbsp;Rate of change of color<input id="colorRange" onchange="render()" type="range"> <br>(both responsive)<br></div>
+
     <input type="checkbox" id="heartShaped"><label for="heartShaped"> Want a heart-shaped maze?</label> <br>
     <canvas id="canvas" height="500" width="500" style="border:1px solid black">
     </canvas><br>
@@ -20,6 +21,6 @@
     <button onclick="preprocess()">create</button>
     <button onclick="initiate()">clear</button><br>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script src="render.js?version=1"></script>
+    <script src="render.js?version=3"></script>
 </body>
 </html>
