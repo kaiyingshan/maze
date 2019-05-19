@@ -4,6 +4,8 @@ function initiate() {
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     ctx.font = '96px serif';
     ctx.strokeText('Create your maze', 50, 250, 400);
+    ctx.strokeRect(0, 0, 500, 500);
+    $('#sizeRange').hide();
 }
 
 /**
@@ -170,14 +172,24 @@ function render() {
         }
     }
     ctx.stroke();
+    if (!heartShaped) {
+        ctx.beginPath();
+        ctx.moveTo(0, t);
+        ctx.lineTo(0, 500);
+        ctx.lineTo(500, 500);
+        ctx.moveTo(500, 500 - t);
+        ctx.lineTo(500, 0);
+        ctx.lineTo(0, 0);
+        ctx.stroke();
+    }
     console.timeEnd('render');
 }
 
 // eslint-disable-next-line no-unused-vars
 function createMaze(colored, heartShaped) {
     const n = parseInt(document.getElementById('rows').value, 10);
-
-    const ratio = 3.5 / n;
+    const heartSize = document.getElementById('heartSizeRange').value;
+    const ratio = (((100 - heartSize) / 50) ** 0.7) * 3.5 / n;
     const offset = n / 2;
     const consts = [n, ratio, offset];
 
@@ -295,6 +307,16 @@ function showAndHide() {
         $('#colorSelection').show();
     } else {
         $('#colorSelection').hide();
+    }
+}
+
+// eslint-disable-next-line no-unused-vars
+function showHideSizeRange() {
+    const box = document.getElementById('heartShaped').checked;
+    if (box) {
+        $('#sizeRange').show();
+    } else {
+        $('#sizeRange').hide();
     }
 }
 

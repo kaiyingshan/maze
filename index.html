@@ -12,12 +12,17 @@
     <input type="radio" name="color" onchange="showAndHide()"> Not Colored<br>
     <div id="colorSelection" style="background-color: cadetblue;width:500px">Change color <input id="colorInput" type="color" onchange="render()"> &nbsp;Rate of change of color<input id="colorRange" onchange="render()" type="range"> <br>(both responsive)<br></div>
 
-    <input type="checkbox" id="heartShaped"><label for="heartShaped"> Want a heart-shaped maze?</label> <br>
-    <canvas id="canvas" height="500" width="500" style="border:1px solid black">
-    </canvas><br>
-    <input id="rows" value="30" type="number"> row/column <br>note: 0 row does not work for a maze. 1 row results in just a plain square. Don't
+    <input type="checkbox" id="heartShaped" onchange="showHideSizeRange()"><label for="heartShaped"> Want a heart-shaped maze?</label> <br>
+
+    <div id="sizeRange" style="background-color: cadetblue;width: 500px"><input type="range" onchange="preprocess()" id="heartSizeRange"> Size of the heart (responsive)<br></div>
+
+    <input id="rows" value="30" type="number"> row/column <br>note: 0 row does not work for a maze. 1 row results in just a
+    plain square. Don't
     use them.
     <br>
+    <canvas id="canvas" height="500" width="500">
+    </canvas><br>
+    
     <button onclick="preprocess()">create</button>
     <button onclick="initiate()">clear</button><br>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
