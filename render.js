@@ -238,19 +238,21 @@ function createMaze(colored, heartShaped) {
         start = Math.floor(Math.random() * n * n) % (n * n);
     }
     // set of known nodes; won't stop until its size is n * n
-    const knownNodes = new Set([start]);
+    const knowns = [start];
+    const knownNodes = new Uint8Array(n * n);
+    knownNodes[start] = 1;
+    let count = 1;
     console.time('spanning tree generation');
     // set of candidate vertex
-    while (knownNodes.size !== counter) {
-        const knowns = Array.from(knownNodes.keys());
-        let chosenNode = knowns[Math.floor(Math.random() * knowns.length) % knowns.length];
+    while (count !== counter) {
+        let chosenNode = knowns[Math.floor(Math.random() * count)];
         let adj = adjList[chosenNode];
-        let next = adj[Math.floor(Math.random() * adj.length) % adj.length];
+        let next = adj[Math.floor(Math.random() * adj.length)];
 
-        while (knownNodes.has(next)) {
-            chosenNode = knowns[Math.floor(Math.random() * knowns.length) % knowns.length];
+        while (knownNodes[next]) {
+            chosenNode = knowns[Math.floor(Math.random() * count)];
             adj = adjList[chosenNode];
-            next = adj[Math.floor(Math.random() * adj.length) % adj.length];
+            next = adj[Math.floor(Math.random() * adj.length)];
         }
 
         for (let i = 0; i < 4; i++) {
@@ -265,7 +267,9 @@ function createMaze(colored, heartShaped) {
                 break;
             }
         }
-        knownNodes.add(next);
+        knownNodes[next] = 1;
+        knowns.push(next);
+        count++;
     }
     console.timeEnd('spanning tree generation');
 
