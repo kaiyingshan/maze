@@ -1,8 +1,15 @@
 # maze
 Currently a trying-to-be-fancy maze generating and rendering tool. Visit [here](https://kaiyingshan.github.io/maze) for a demo.
-|![demo1](./assets/1.png)|![demo2](./assets/4.png)|
-|------------|------------|
-|Square maze colored with blue.|Heart-shaped maze colored with pink.|
+<table style="border: 0">
+    <tr>
+        <td><img src="assets/1.png" width="375px"></td>
+        <td><img src="assets/4.png" width="375px"></td>
+    </tr>
+    <tr>
+        <td>Square maze colored with blue.</td>
+        <td>Heart-shaped maze colored with pink.</td>
+    </tr>
+</table>
 
 ### Mechanism
 #### Maze generation and rendering
