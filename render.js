@@ -75,6 +75,23 @@ function makeAdjList(rawList, n, ratio, offset) {
     return result;
 }
 
+const colors = [document.getElementById('colorInput')];
+
+// eslint-disable-next-line no-unused-vars
+function addColor() {
+    $('#colorSelection').append(`<div id="b${colors.length}"><br><input class="moreColor" id="c${colors.length}" type="color"><button class="moreColor" onclick="deleteColor(${colors.length})">delete</button><br></div>`);
+    colors.push(document.getElementById(`c${colors.length}`));
+}
+
+// eslint-disable-next-line no-unused-vars
+function deleteColor(index) {
+    for (let i = index; i < colors.length - 1; i++) {
+        colors[i].value = colors[i + 1].value;
+    }
+    $(`#b${colors.length - 1}`).remove();
+    colors.pop();
+}
+
 let cacheObj = {
     record: '',
     colored: '',
