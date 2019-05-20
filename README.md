@@ -1,7 +1,7 @@
 # maze
 Currently a trying-to-be-fancy maze generating and rendering tool. Visit [here](https://kaiyingshan.github.io/maze) for a demo.
-|![demo1](./assets/1.png)|![demo2](./assets/4.png)/
-|------------|------------
+|![demo1](./assets/1.png)|![demo2](./assets/4.png)|
+|------------|------------|
 |Square maze colored with blue.|Heart-shaped maze colored with pink.|
 
 ### Mechanism
