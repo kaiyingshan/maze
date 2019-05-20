@@ -115,7 +115,7 @@ function render() {
             visited[curNode] = true;
             stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
             ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
-            ctx.fillRect((curNode % n) * t, Math.floor(curNode / n) * t, t, t);
+            ctx.fillRect((curNode % n) * t - 1, Math.floor(curNode / n) * t - 1, t + 1, t + 1);
             l += delta;
             if (l > 100) {
                 l = originalL;

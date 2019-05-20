@@ -10,7 +10,7 @@
 <body>
     <input type="radio" name="color" checked onchange="showAndHide()"> Colored (Using DFS)<br>
     <input type="radio" name="color" onchange="showAndHide()"> Not Colored<br>
-    <div id="colorSelection" style="background-color: cadetblue;width:500px">Change color <input id="colorInput" type="color" onchange="render()"> &nbsp;Rate of change of color<input id="colorRange" onchange="render()" type="range"> <br>(both responsive)<br></div>
+    <div id="colorSelection" style="background-color: cadetblue;width:500px">Change color <input id="colorInput" type="color" onchange="if(created){render();}"> &nbsp;Rate of change of color<input id="colorRange" onchange="if(created){render();}" type="range"> <br>(both responsive)<br></div>
 
     <input type="checkbox" id="heartShaped" onchange="showHideSizeRange()"><label for="heartShaped"> Want a heart-shaped maze?</label> <br>
 
