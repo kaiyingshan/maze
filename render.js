@@ -3,8 +3,9 @@ function initiate() {
     const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     ctx.font = '96px serif';
-    ctx.strokeText('Create your maze', 50, 250, 400);
-    ctx.strokeRect(0, 0, 500, 500);
+    ctx.strokeText('Create your maze', 50, 400, 500);
+    ctx.strokeRect(0, 0, 700, 700);
+    document.getElementById('heartShaped').checked = false;
     $('#sizeRange').hide();
 }
 
@@ -91,7 +92,7 @@ function render() {
         record, colored, heartShaped, consts, start, n,
     } = cacheObj;
     const color = RGBtoHSL(document.getElementById('colorInput').value);
-    const t = 500 / n;
+    const t = 700 / n;
     let x = 0;
     let y = 0;
     const ctx = document.getElementById('canvas').getContext('2d');
@@ -177,10 +178,10 @@ function render() {
     if (!heartShaped) {
         ctx.beginPath();
         ctx.moveTo(0, t);
-        ctx.lineTo(0, 500);
-        ctx.lineTo(500, 500);
-        ctx.moveTo(500, 500 - t);
-        ctx.lineTo(500, 0);
+        ctx.lineTo(0, 700);
+        ctx.lineTo(700, 700);
+        ctx.moveTo(700, 700 - t);
+        ctx.lineTo(700, 0);
         ctx.lineTo(0, 0);
         ctx.stroke();
     }
