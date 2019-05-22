@@ -79,7 +79,7 @@ const colors = [document.getElementById('colorInput')];
 
 // eslint-disable-next-line no-unused-vars
 function addColor() {
-    $('#colorSelection').append(`<div id="b${colors.length}"><br><input class="moreColor" id="c${colors.length}" type="color"><button class="moreColor" onclick="deleteColor(${colors.length})">delete</button><br></div>`);
+    $('#colorSelection').append(`<div id="b${colors.length}"><br><input onchange="if(created){render();}" class="moreColor" id="c${colors.length}" type="color"><button class="moreColor" onclick="deleteColor(${colors.length})">delete</button><br></div>`);
     colors.push(document.getElementById(`c${colors.length}`));
 }
 
@@ -104,11 +104,21 @@ let cacheObj = {
 // eslint-disable-next-line
 let created = false;
 
+/**
+ * TODO: Change colorspace to RGB
+ */
 function render() {
     const {
         record, colored, heartShaped, consts, start, n,
     } = cacheObj;
-    const color = RGBtoHSL(document.getElementById('colorInput').value);
+    // const color = RGBtoHSL(document.getElementById('colorInput').value);
+    const color = [];
+    for (let i = 0; i < colors.length; i++) {
+        color.push(RGBtoHSL(colors[i].value));
+    }
+    console.log(color);
+    let colorCounter = 0;
+    const cl = colors.length;
     const t = 700 / n;
     let x = 0;
     let y = 0;
@@ -117,11 +127,16 @@ function render() {
     console.time('render');
     if (colored) {
         const mul = parseInt(document.getElementById('colorRange').value, 10);
-        const delta = mul * 2 / n;
-        const h = color[0];
-        const s = color[1];
-        let l = color[2];
-        const originalL = l;
+        // const delta = mul * 2 / n;
+
+        let deltaH = mul * (color[(colorCounter + 1) % cl][0] - color[colorCounter][0]) / (n * 25);
+        let deltaS = mul * (color[(colorCounter + 1) % cl][1] - color[colorCounter][1]) / (n * 25);
+        let deltaL = mul * (color[(colorCounter + 1) % cl][2] - color[colorCounter][2]) / (n * 25);
+
+        let h = color[0][0];
+        let s = color[0][1];
+        let l = color[0][2];
+        // const originalL = l;
 
         const stack = [start];
         const visited = new Array(n * n);
@@ -134,9 +149,30 @@ function render() {
             stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
             ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
             ctx.fillRect((curNode % n) * t - 1, Math.floor(curNode / n) * t - 1, t + 1, t + 1);
-            l += delta;
-            if (l > 100) {
-                l = originalL;
+            h += deltaH;
+            if (deltaH === 0 && deltaL === 0) {
+                s += deltaS;
+            }
+
+            l += deltaL;
+            if ((
+                (deltaH < 0 && h < color[(colorCounter + 1) % cl][0])
+                || (deltaH > 0 && h > color[(colorCounter + 1) % cl][0])
+            ) || ((deltaS < 0
+                && s < color[(colorCounter + 1) % cl][1])
+                || (deltaS > 0
+                    && s > color[(colorCounter + 1) % cl][1])
+            ) || ((deltaL < 0
+                    && l < color[(colorCounter + 1) % cl][2])
+                    || (deltaL > 0
+                        && l > color[(colorCounter + 1) % cl][2])
+            )) {
+                colorCounter = (colorCounter + 1) % cl;
+                console.log('changed');
+                console.log(`${deltaH} ${deltaS} ${deltaL}`);
+                deltaH = mul * (color[(colorCounter + 1) % cl][0] - color[colorCounter][0]) / (n * 25);
+                deltaS = mul * (color[(colorCounter + 1) % cl][1] - color[colorCounter][1]) / (n * 25);
+                deltaL = mul * (color[(colorCounter + 1) % cl][2] - color[colorCounter][2]) / (n * 25);
             }
         }
     }
@@ -205,6 +241,10 @@ function render() {
     console.timeEnd('render');
 }
 
+/**
+ * TODO: Arbitrary shape
+ *       More generating algorithms & coloring algorithms
+ */
 // eslint-disable-next-line no-unused-vars
 function createMaze(colored, heartShaped) {
     const n = parseInt(document.getElementById('rows').value, 10);
