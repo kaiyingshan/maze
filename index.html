@@ -8,11 +8,15 @@
 </head>
 <body>
     <table><td style="width:50%">
-            <div style="width:50%; margin:auto auto;padding:5px;background-color: darkseagreen">
+            <div style="width:50%;height:600px; margin:auto auto;padding:5px;background-color: darkseagreen">
                 <input type="radio" name="color" checked onchange="showAndHide()"> Colored (Using DFS)<br>
                 <input type="radio" name="color" onchange="showAndHide()"> Not Colored<br><br>
-                <div id="colorSelection"><input id="colorInput" title="change color (responsive)" type="color" onchange="if(created){render();}">&nbsp;<input id="colorRange" onchange="if(created){render();}" type="range" title="rate of change of color (responsive)"><br><br>
-                <button onclick="addColor()">add color</button>
+                <div id="colorSelection">
+                    <input id="colorRange" onchange="if(created){render();}" type="range" title="rate of change of color (responsive)"><br>
+                    <input id="option1" type="radio" onchange="showAddColor()" checked name="option"><label for="option1"> Multiple Colors</label>
+                    <input id="option2" type="radio" onchange="showAddColor()" name="option"><label for="option2"> One color to white</label><br><br>
+                    <div id="addColor"><button onclick="addColor()">add color</button><br><br></div>
+                    <input id="colorInput" title="change color (responsive)" type="color" onchange="if(created){render();}"><br>
                 </div>
                 
                 <input type="checkbox" id="heartShaped" onchange="showHideSizeRange()"><label for="heartShaped"> Want a heart-shaped

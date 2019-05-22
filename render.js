@@ -7,13 +7,27 @@ function initiate() {
     ctx.strokeRect(0, 0, 700, 700);
     document.getElementById('heartShaped').checked = false;
     $('#sizeRange').hide();
+    $('#addColor').show();
+}
+
+function RGB(rgbColor) {
+    let rgb = rgbColor;
+    while (rgb.length < 7) {
+        rgb += '0';
+    }
+    const r = parseInt(rgb.substring(1, 3), 16);
+    const g = parseInt(rgb.substring(3, 5), 16);
+    const b = parseInt(rgb.substring(5, 7), 16);
+    return [r, g, b];
 }
 
 /**
  * acknowledgement: referred to https://css-tricks.com/
  * converting-color-spaces-in-javascript/
  */
-function RGBtoHSL(rgbColor) {
+
+// eslint-disable-next-line no-unused-vars
+function HSL(rgbColor) {
     let rgb = rgbColor;
     while (rgb.length < 7) {
         rgb += '0';
@@ -79,7 +93,10 @@ const colors = [document.getElementById('colorInput')];
 
 // eslint-disable-next-line no-unused-vars
 function addColor() {
-    $('#colorSelection').append(`<div id="b${colors.length}"><br><input onchange="if(created){render();}" class="moreColor" id="c${colors.length}" type="color"><button class="moreColor" onclick="deleteColor(${colors.length})">delete</button><br></div>`);
+    $('#colorSelection').append(`<div id="b${colors.length}"><br>
+    <input onchange="if(created){render();}" class="moreColor" id="c${colors.length}" type="color">
+    <button class="moreColor" onclick="deleteColor(${colors.length});if(created){render()}">delete</button>
+    <br></div>`);
     colors.push(document.getElementById(`c${colors.length}`));
 }
 
@@ -111,12 +128,13 @@ function render() {
     const {
         record, colored, heartShaped, consts, start, n,
     } = cacheObj;
-    // const color = RGBtoHSL(document.getElementById('colorInput').value);
+    // const color = RGB(document.getElementById('colorInput').value);
     const color = [];
+    const options = document.getElementsByName('option');
+    const option = options[0].checked ? 1 : 2;
     for (let i = 0; i < colors.length; i++) {
-        color.push(RGBtoHSL(colors[i].value));
+        color.push(option === 1 ? RGB(colors[i].value) : HSL(colors[i].value));
     }
-    console.log(color);
     let colorCounter = 0;
     const cl = colors.length;
     const t = 700 / n;
@@ -129,14 +147,18 @@ function render() {
         const mul = parseInt(document.getElementById('colorRange').value, 10);
         // const delta = mul * 2 / n;
 
-        let deltaH = mul * (color[(colorCounter + 1) % cl][0] - color[colorCounter][0]) / (n * 25);
-        let deltaS = mul * (color[(colorCounter + 1) % cl][1] - color[colorCounter][1]) / (n * 25);
-        let deltaL = mul * (color[(colorCounter + 1) % cl][2] - color[colorCounter][2]) / (n * 25);
+        let [h, s, l] = color[0];
 
-        let h = color[0][0];
-        let s = color[0][1];
-        let l = color[0][2];
-        // const originalL = l;
+        let deltaH = mul * (color[(colorCounter + 1) % cl][0] - h) / (n * 25);
+        let deltaS = mul * (color[(colorCounter + 1) % cl][1] - s) / (n * 25);
+        let deltaL;
+        const originalL = l;
+        if (option === 1) {
+            deltaL = mul * (color[(colorCounter + 1) % cl][2] - l) / (n * 25);
+        } else {
+            deltaL = mul * (100 - l) / (n * 25);
+        }
+
 
         const stack = [start];
         const visited = new Array(n * n);
@@ -147,32 +169,34 @@ function render() {
             curNode = stack.pop();
             visited[curNode] = true;
             stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
-            ctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
+            // eslint-disable-next-line no-nested-ternary
+            ctx.fillStyle = option === 1 ? `rgb(${h}, ${s}, ${l})` : option === 2 ? `hsl(${h}, ${s}%, ${l}%)` : '';
             ctx.fillRect((curNode % n) * t - 1, Math.floor(curNode / n) * t - 1, t + 1, t + 1);
-            h += deltaH;
-            if (deltaH === 0 && deltaL === 0) {
+            if (option === 1) {
+                h += deltaH;
                 s += deltaS;
             }
-
             l += deltaL;
-            if ((
-                (deltaH < 0 && h < color[(colorCounter + 1) % cl][0])
-                || (deltaH > 0 && h > color[(colorCounter + 1) % cl][0])
-            ) || ((deltaS < 0
-                && s < color[(colorCounter + 1) % cl][1])
-                || (deltaS > 0
-                    && s > color[(colorCounter + 1) % cl][1])
-            ) || ((deltaL < 0
-                    && l < color[(colorCounter + 1) % cl][2])
-                    || (deltaL > 0
-                        && l > color[(colorCounter + 1) % cl][2])
-            )) {
+            if ((option === 1) && ((
+                (deltaH <= 0 && h <= color[(colorCounter + 1) % cl][0])
+                || (deltaH >= 0 && h >= color[(colorCounter + 1) % cl][0])
+            ) || ((deltaS <= 0
+                && s <= color[(colorCounter + 1) % cl][1])
+                || (deltaS >= 0
+                    && s >= color[(colorCounter + 1) % cl][1])
+            ) || ((deltaL <= 0
+                    && l <= color[(colorCounter + 1) % cl][2])
+                    || (deltaL >= 0
+                        && l >= color[(colorCounter + 1) % cl][2])
+            ))) {
                 colorCounter = (colorCounter + 1) % cl;
-                console.log('changed');
-                console.log(`${deltaH} ${deltaS} ${deltaL}`);
-                deltaH = mul * (color[(colorCounter + 1) % cl][0] - color[colorCounter][0]) / (n * 25);
-                deltaS = mul * (color[(colorCounter + 1) % cl][1] - color[colorCounter][1]) / (n * 25);
-                deltaL = mul * (color[(colorCounter + 1) % cl][2] - color[colorCounter][2]) / (n * 25);
+                deltaH = mul * (color[(colorCounter + 1) % cl][0] - h) / (n * 25);
+                deltaS = mul * (color[(colorCounter + 1) % cl][1] - s) / (n * 25);
+                deltaL = mul * (color[(colorCounter + 1) % cl][2] - l) / (n * 25);
+            }
+
+            if ((option === 2) && (l > 100)) {
+                l = originalL;
             }
         }
     }
@@ -367,6 +391,21 @@ function showAndHide() {
         $('#colorSelection').show();
     } else {
         $('#colorSelection').hide();
+    }
+}
+
+function showAddColor() {
+    const radios = document.getElementsByName('option');
+    if (radios[0].checked) {
+        $('#addColor').show();
+        for (let i = 1; i < colors.length; i++) {
+            $(`#b${i}`).show();
+        }
+    } else {
+        $('#addColor').hide();
+        for (let i = 1; i < colors.length; i++) {
+            $(`#b${i}`).hide();
+        }
     }
 }
 
