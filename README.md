@@ -2,12 +2,14 @@
 Currently a trying-to-be-fancy maze generating and rendering tool. Visit [here](https://kaiyingshan.github.io/maze) for a demo.
 <table style="border: 0">
     <tr>
-        <td><img src="assets/1.png" width="375px"></td>
-        <td><img src="assets/4.png" width="375px"></td>
+        <td><img src="assets/1.png" width="325px"></td>
+        <td><img src="assets/4.png" width="325px"></td>
+        <td><img src="assets/5.png" width="325px"></td>
     </tr>
     <tr>
         <td>Square maze colored with blue.</td>
         <td>Heart-shaped maze colored with pink.</td>
+        <td>Maze with multiple colors.</td>
     </tr>
 </table>
 
