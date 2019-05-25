@@ -4,41 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>maze</title>
 </head>
 <body>
-    <table><td style="width:50%">
-            <div style="width:50%;height:600px; margin:auto auto;padding:5px;background-color: darkseagreen">
-                <input type="radio" name="color" checked onchange="showAndHide()"> Colored (Using DFS)<br>
-                <input type="radio" name="color" onchange="showAndHide()"> Not Colored<br><br>
-                <div id="colorSelection">
-                    <input id="colorRange" onchange="if(created){render();}" type="range" title="rate of change of color (responsive)"><br>
-                    <input id="option1" type="radio" onchange="showAddColor()" checked name="option"><label for="option1"> Multiple Colors</label>
-                    <input id="option2" type="radio" onchange="showAddColor()" name="option"><label for="option2"> One color to white</label><br><br>
-                    <div id="addColor"><button onclick="addColor()">add color</button><br><br></div>
-                    <input id="colorInput" title="change color (responsive)" type="color" onchange="if(created){render();}"><br>
-                </div>
-                
-                <input type="checkbox" id="heartShaped" onchange="showHideSizeRange()"><label for="heartShaped"> Want a heart-shaped
-                    maze?</label> <br>
-                
-                <div id="sizeRange" ><input type="range" onchange="if(created)preprocess()"id="heartSizeRange" title="Size of the heart (responsive)"><br></div>
-                
-                <input id="rows" value="60" type="number"> row/column <br>note: 0 row does not work for a maze. 1 row results in just a
-                plain square. Don't
-                use them.
-                <br>
-                <button onclick="preprocess(); created = true;">create</button>
-                <button onclick="initiate()">clear</button><br>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-sm">
+                <ul class="list-group mt-4">
+                    <li class="list-group-item"><input type="checkbox" id="color" checked onchange="showAndHide()">Colored</li>
+                    <li class="colorSelection list-group-item">
+                        Rate of change <input id="colorRange" class="ml-4" onchange="if(created){render();}" type="range" title="rate of change of color (responsive)"><br>
+                        <input id="option1" type="radio" onchange="showAddColor()" checked name="option"><label for="option1"> Multiple
+                            Colors</label>
+                        <input id="option2" class="ml-4" type="radio" onchange="showAddColor()" name="option"><label for="option2"> Single color</label>
+                    </li>
+                    <li id="colorBoard" class="colorSelection list-group-item">
+                        <div id="addColor"><button class="btn btn-primary mb-1" onclick="addColor()">Add more colors</button><br></div>
+                            <input id="colorInput" class="mb-1" title="change color (responsive)" type="color" value="#f07070"
+                                onchange="if(created){render();}">
+                            Choose color
+                    </li>
+                    <li class="list-group-item"><input type="checkbox" id="heartShaped" onchange="showHideSizeRange()"><label for="heartShaped"> Heart Shaped</label></li>
+                    <li id="sizeRange" class="list-group-item">
+                        Change size of the Heart<input type="range" onchange="if(created)preprocess()" id="heartSizeRange"
+                                title="Size of the heart (responsive)">
+                    </li>
+                    <li class="list-group-item">
+                        <input id="rows" value="60" type="number"> rows/columns
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-primary" onclick="preprocess(); created = true;">create</button>
+                        <button class="btn btn-warning" onclick="initiate()">clear</button>
+                    </li>
+                </ul>
+
             </div>
-            
-        </td>
-        <td>
-            <canvas id="canvas" height="700" width="700"></canvas>
-        </td>
-    </table>
-    </canvas><br>
+            <div class="col-sm-8">
+                <canvas id="canvas" height="700" width="700"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="render.js?version=3"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
 </body>
 </html>

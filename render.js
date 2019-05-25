@@ -1,4 +1,18 @@
 
+const colors = [document.getElementById('colorInput')];
+
+let cacheObj = {
+    record: '',
+    colored: '',
+    heartShaped: '',
+    consts: '',
+    start: '',
+    n: '',
+};
+
+// eslint-disable-next-line no-unused-vars
+let created = false;
+
 function initiate() {
     const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
@@ -8,6 +22,7 @@ function initiate() {
     document.getElementById('heartShaped').checked = false;
     $('#sizeRange').hide();
     $('#addColor').show();
+    created = false;
 }
 
 function RGB(rgbColor) {
@@ -89,14 +104,13 @@ function makeAdjList(rawList, n, ratio, offset) {
     return result;
 }
 
-const colors = [document.getElementById('colorInput')];
 
 // eslint-disable-next-line no-unused-vars
 function addColor() {
-    $('#colorSelection').append(`<div id="b${colors.length}"><br>
-    <input onchange="if(created){render();}" class="moreColor" id="c${colors.length}" type="color">
-    <button class="moreColor" onclick="deleteColor(${colors.length});if(created){render()}">delete</button>
-    <br></div>`);
+    $('#colorBoard').append(`<div id="b${colors.length}" class="mb-1">
+    <input onchange="if(created){render();}" class="moreColor" id="c${colors.length}" type="color"> Choose color
+    <button class="close" onclick="deleteColor(${colors.length});if(created){render()}">&times;</button>
+    </div>`);
     colors.push(document.getElementById(`c${colors.length}`));
 }
 
@@ -108,18 +122,6 @@ function deleteColor(index) {
     $(`#b${colors.length - 1}`).remove();
     colors.pop();
 }
-
-let cacheObj = {
-    record: '',
-    colored: '',
-    heartShaped: '',
-    consts: '',
-    start: '',
-    n: '',
-};
-
-// eslint-disable-next-line
-let created = false;
 
 /**
  * TODO: Change colorspace to RGB
@@ -277,7 +279,7 @@ function createMaze(colored, heartShaped) {
     const offset = n / 2;
     const consts = [n, ratio, offset];
 
-    if (n < 1) {
+    if (n < 2) {
         alert('DID YOU READ THE NOTE??');
         return 0;
     }
@@ -377,8 +379,8 @@ function createMaze(colored, heartShaped) {
 
 // eslint-disable-next-line no-unused-vars
 function preprocess() {
-    const radios = document.getElementsByName('color');
-    const colored = radios[0].checked;
+    const radios = document.getElementById('color');
+    const colored = radios.checked;
     const heartShaped = document.getElementById('heartShaped').checked;
 
     createMaze(colored, heartShaped);
@@ -386,11 +388,11 @@ function preprocess() {
 
 // eslint-disable-next-line no-unused-vars
 function showAndHide() {
-    const radios = document.getElementsByName('color');
-    if (radios[0].checked) {
-        $('#colorSelection').show();
+    const radios = document.getElementById('color');
+    if (radios.checked) {
+        $('.colorSelection').show();
     } else {
-        $('#colorSelection').hide();
+        $('.colorSelection').hide();
     }
 }
 
@@ -418,6 +420,5 @@ function showHideSizeRange() {
         $('#sizeRange').hide();
     }
 }
-
 
 window.onload = initiate;
