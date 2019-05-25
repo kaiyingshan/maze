@@ -19,6 +19,10 @@
         "no-alert": "off",
         "no-plusplus": "off",
         "no-continue": "off",
-        "no-console": "off"
+        "no-console": "off",
+        "no-eval": "off",
+        "no-undef": "warn",
+        "no-restricted-globals": "off",
+        "no-unused-vars": "off"
     }
 }

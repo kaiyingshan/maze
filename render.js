@@ -10,7 +10,6 @@ let cacheObj = {
     n: '',
 };
 
-// eslint-disable-next-line no-unused-vars
 let created = false;
 
 function initiate() {
@@ -40,8 +39,6 @@ function RGB(rgbColor) {
  * acknowledgement: referred to https://css-tricks.com/
  * converting-color-spaces-in-javascript/
  */
-
-// eslint-disable-next-line no-unused-vars
 function HSL(rgbColor) {
     let rgb = rgbColor;
     while (rgb.length < 7) {
@@ -88,16 +85,27 @@ function HSL(rgbColor) {
     return [h, s, l];
 }
 
-function insideHeartCurve(i, n, ratio, offset) {
+function insideHeartCurve(i, n, ratio, offset, eqX, eqY) {
     const x = ((i % n) - offset) * ratio;
-    const y = (Math.floor(i / n) - offset) * ratio;
-    return -1 * (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) > 0;
+    const y = -1 * (Math.floor(i / n) - offset) * ratio;
+    // console.log(`${x } ${y}`);
+    // return (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) < 0;
+    const e = eqX.evaluate({ x });
+    const ts = e.solveFor('t');
+    if (!ts || ts.length === 0) {
+        return false;
+    }
+    const t = eval(ts[0].evaluate().toString());
+
+    const calcY = eval(eqY.evaluate({ t }).solveFor('y')[0].evaluate().toString());
+    if (isNaN(calcY)) return false;
+    return y > calcY;
 }
 
-function makeAdjList(rawList, n, ratio, offset) {
+function makeAdjList(rawList, n, ratio, offset, eqX, eqY) {
     const result = [];
     for (let i = 0; i < rawList.length; i++) {
-        if (insideHeartCurve(rawList[i], n, ratio, offset)) {
+        if (insideHeartCurve(rawList[i], n, ratio, offset, eqX, eqY)) {
             result.push(rawList[i]);
         }
     }
@@ -105,7 +113,6 @@ function makeAdjList(rawList, n, ratio, offset) {
 }
 
 
-// eslint-disable-next-line no-unused-vars
 function addColor() {
     $('#colorBoard').append(`<div id="b${colors.length}" class="mb-1">
     <input onchange="if(created){render();}" class="moreColor" id="c${colors.length}" type="color"> Choose color
@@ -114,7 +121,7 @@ function addColor() {
     colors.push(document.getElementById(`c${colors.length}`));
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function deleteColor(index) {
     for (let i = index; i < colors.length - 1; i++) {
         colors[i].value = colors[i + 1].value;
@@ -271,13 +278,15 @@ function render() {
  * TODO: Arbitrary shape
  *       More generating algorithms & coloring algorithms
  */
-// eslint-disable-next-line no-unused-vars
+
 function createMaze(colored, heartShaped) {
     const n = parseInt(document.getElementById('rows').value, 10);
     const heartSize = document.getElementById('heartSizeRange').value;
     const ratio = (((100 - heartSize) / 50) ** 0.7) * 3.5 / n;
     const offset = n / 2;
-    const consts = [n, ratio, offset];
+    const eqX = nerdamer('x = t');
+    const eqY = nerdamer('y = sqrt(t)');
+    const consts = [n, ratio, offset, eqX, eqY];
 
     if (n < 2) {
         alert('DID YOU READ THE NOTE??');
@@ -289,7 +298,7 @@ function createMaze(colored, heartShaped) {
     let counter = 0;
     // create adjacency list
     for (let i = 0; i < n * n; i++) {
-        if (heartShaped && !insideHeartCurve(i, n, ratio, offset)) {
+        if (heartShaped && !insideHeartCurve(i, n, ratio, offset, eqX, eqY)) {
             adjList[i] = [];
             continue;
         }
@@ -377,7 +386,7 @@ function createMaze(colored, heartShaped) {
     return 0;
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function preprocess() {
     const radios = document.getElementById('color');
     const colored = radios.checked;
@@ -386,7 +395,7 @@ function preprocess() {
     createMaze(colored, heartShaped);
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function showAndHide() {
     const radios = document.getElementById('color');
     if (radios.checked) {
@@ -395,6 +404,7 @@ function showAndHide() {
         $('.colorSelection').hide();
     }
 }
+
 
 function showAddColor() {
     const radios = document.getElementsByName('option');
@@ -411,7 +421,7 @@ function showAddColor() {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function showHideSizeRange() {
     const box = document.getElementById('heartShaped').checked;
     if (box) {
