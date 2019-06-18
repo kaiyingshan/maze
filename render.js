@@ -1,5 +1,12 @@
 
+const ctx = document.getElementById('canvas').getContext('2d');
+
+let pacMan = new Image();
+pacMan.src = '../assets/pac-man.png';
+
 const colors = [document.getElementById('colorInput')];
+
+let colorRecord;
 
 let cacheObj = {
     record: '',
@@ -10,11 +17,15 @@ let cacheObj = {
     n: '',
 };
 
+let readyToPlay = false;
+let curSquare;
+let playRecord = null;
+
 // eslint-disable-next-line no-unused-vars
 let created = false;
 
 function initiate() {
-    const ctx = document.getElementById('canvas').getContext('2d');
+    
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     ctx.font = '96px serif';
     ctx.strokeText('Create your maze', 50, 400, 500);
@@ -22,7 +33,11 @@ function initiate() {
     document.getElementById('heartShaped').checked = false;
     $('#sizeRange').hide();
     $('#addColor').show();
+    document.getElementById("playBtn").innerHTML = 'Play with the maze';
+    document.getElementById("playInstruction").innerHTML = '';
     created = false;
+    readyToPlay = false;
+    playRecord = null;
 }
 
 function RGB(rgbColor) {
@@ -142,7 +157,7 @@ function render() {
     const t = 700 / n;
     let x = 0;
     let y = 0;
-    const ctx = document.getElementById('canvas').getContext('2d');
+    // const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     console.time('render');
     if (colored) {
@@ -419,6 +434,91 @@ function showHideSizeRange() {
     } else {
         $('#sizeRange').hide();
     }
+}
+
+function play(event){
+    if(!created || !readyToPlay) return;
+    const record = cacheObj.record;
+    curSquare = 0;
+    const n = cacheObj.n;
+    const len = 700 / n;
+    // const ctx = document.getElementById('canvas').getContext('2d');
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, len, len);
+    ctx.fillStyle = 'red';
+    ctx.fillRect(700 - len, 700 - len, len, len);
+}
+
+function fillSquare(node) {
+    const n = cacheObj.n;
+    const t = 700 / n;
+    // const ctx = document.getElementById('canvas').getContext('2d');
+    ctx.fillStyle = 'blue';
+    ctx.fillRect((node % n) * t + 2, Math.floor(node / n) * t + 2, t - 4, t - 4);
+}
+
+function clearSquare(node){
+    const n = cacheObj.n;
+    const t = 700 / n;
+    // const ctx = document.getElementById('canvas').getContext('2d');
+    ctx.fillStyle = 'yellow';
+    ctx.fillRect((node % n) * t + 2, Math.floor(node / n) * t + 2, t - 4, t - 4);
+}
+
+function handleSquare(cur, next){
+    const idx = playRecord[cur].indexOf(next);
+    if(idx !== -1){
+        clearSquare(cur);
+        playRecord[cur].splice(idx, 1);
+        playRecord[next].splice(playRecord[next].indexOf(cur), 1);
+    }else{
+        fillSquare(next);
+        playRecord[cur].push(next);
+        playRecord[next].push(cur);
+    }
+}
+
+function update(event){
+    if(!readyToPlay) return;
+    if(event.keyCode === 37){ // left
+        if(cacheObj.record[curSquare].indexOf(curSquare - 1) != -1){
+            handleSquare(curSquare, curSquare - 1);
+            curSquare = curSquare - 1;
+        }
+    }else if(event.keyCode === 39){ // right
+        if(cacheObj.record[curSquare].indexOf(curSquare + 1) != -1){
+            handleSquare(curSquare, curSquare + 1);
+            curSquare = curSquare + 1;
+        }
+    }else if(event.keyCode === 38){ // up
+        if(cacheObj.record[curSquare].indexOf(curSquare - cacheObj.n) != -1){
+            handleSquare(curSquare, curSquare - cacheObj.n);
+            curSquare = curSquare - cacheObj.n;
+        }
+    }else if(event.keyCode === 40){ // down
+        if(cacheObj.record[curSquare].indexOf(curSquare + cacheObj.n) != -1){
+            handleSquare(curSquare, curSquare + cacheObj.n);
+            curSquare = curSquare + cacheObj.n;
+        }
+    }
+}
+
+function preparePlay(){
+    if(!created) {alert('Create a maze first'); return; }
+    if(document.getElementById("playBtn").innerHTML === 'Play with the maze'){
+        readyToPlay = true;
+        document.getElementById("playBtn").innerHTML = "Press to stop";
+        document.getElementById("playInstruction").innerHTML = "Press ⬆️ ⬇️ ⬅️ ➡️ to play";
+        playRecord = new Array(cacheObj.n * cacheObj.n);
+        for(let i = 0; i < cacheObj.n * cacheObj.n; i++){
+            playRecord[i] = [];
+        }
+        play();
+    }else{
+        document.getElementById("playBtn").innerHTML = 'Play with the maze';
+        document.getElementById("playInstruction").innerHTML = '';
+    }
+    
 }
 
 window.onload = initiate;

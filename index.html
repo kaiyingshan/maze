@@ -8,7 +8,7 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>maze</title>
 </head>
-<body>
+<body onkeydown="update(event)">
     <div class="container mt-4">
         <div class="row">
             <div class="col-sm">
@@ -35,6 +35,10 @@
                         <input id="rows" value="60" type="number"> rows/columns
                     </li>
                     <li class="list-group-item">
+                        <button id="playBtn" class="btn btn-primary" onclick="preparePlay()" >Play with the maze</button>
+                        <p id="playInstruction"></p>
+                    </li>
+                    <li class="list-group-item">
                         <button class="btn btn-primary" onclick="preprocess(); created = true;">create</button>
                         <button class="btn btn-warning" onclick="initiate()">clear</button>
                     </li>
@@ -55,6 +59,6 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
-    <script src="render.js?version=4"></script>
+    <script src="render.js?version=5"></script>
 </body>
 </html>
