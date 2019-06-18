@@ -1,6 +1,10 @@
 
 const colors = [document.getElementById('colorInput')];
 
+const ctx = document.getElementById('canvas').getContext('2d');
+
+let colorRecord;
+
 let cacheObj = {
     record: '',
     colored: '',
@@ -12,8 +16,10 @@ let cacheObj = {
 
 let created = false;
 
+let onGame = false;
+
 function initiate() {
-    const ctx = document.getElementById('canvas').getContext('2d');
+    // const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     ctx.font = '96px serif';
     ctx.strokeText('Create your maze', 50, 400, 500);
@@ -22,6 +28,7 @@ function initiate() {
     $('#sizeRange').hide();
     $('#addColor').show();
     created = false;
+    onGame = false;
 }
 
 function RGB(rgbColor) {
@@ -134,6 +141,7 @@ function deleteColor(index) {
  * TODO: Change colorspace to RGB
  */
 function render() {
+    document.getElementById('playBtn').innerHTML = 'Press to start game';
     const {
         record, colored, heartShaped, consts, start, n,
     } = cacheObj;
@@ -149,8 +157,9 @@ function render() {
     const t = 700 / n;
     let x = 0;
     let y = 0;
-    const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
+    colorRecord = new Array(n * n);
+    colorRecord.fill(['rbg', 255, 255, 255]);
     console.time('render');
     if (colored) {
         const mul = parseInt(document.getElementById('colorRange').value, 10);
@@ -180,6 +189,7 @@ function render() {
             stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
             // eslint-disable-next-line no-nested-ternary
             ctx.fillStyle = option === 1 ? `rgb(${h}, ${s}, ${l})` : option === 2 ? `hsl(${h}, ${s}%, ${l}%)` : '';
+            colorRecord[curNode] = [option === 1 ? 'rbg' : 'hsl', h, s, l];
             ctx.fillRect((curNode % n) * t - 1, Math.floor(curNode / n) * t - 1, t + 1, t + 1);
             if (option === 1) {
                 h += deltaH;
@@ -421,7 +431,6 @@ function showAddColor() {
     }
 }
 
-
 function showHideSizeRange() {
     const box = document.getElementById('heartShaped').checked;
     if (box) {
@@ -429,6 +438,46 @@ function showHideSizeRange() {
     } else {
         $('#sizeRange').hide();
     }
+}
+
+function onPressGameBtn(){
+    if(!created){
+        alert('create a maze first');
+        return;
+    }
+    if(onGame){
+        render();
+    }else{
+        document.getElementById('playBtn').innerHTML = 'Press to stop';
+        prepareForGame();
+    }
+    onGame = !onGame;
+    // if not on game
+}
+
+function updateGame(from, to){
+    if(!onGame) return;
+    
+}
+
+function prepareForGame(){
+    // figure out starting point;
+    let start = 0;
+    let haveStart = false;
+    for(let i = 0; i < cacheObj.record.length; i++){
+        if(cacheObj.record[start].length > 0){
+            haveStart = true;
+            break;
+        }
+    }
+    if(!haveStart){
+        alert("You don't have a maze or your maze is too small.");
+        return;
+    }
+    // mark start & end point
+    const len = 700 / cacheObj.n;
+    ctx.fillRect(0, 0, len, len);
+    ctx.fillRect(700 - len, 700 - len, len, len);
 }
 
 window.onload = initiate;
