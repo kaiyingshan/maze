@@ -1,5 +1,13 @@
 
+// 别看了，写得可烂了 ￣へ￣
+
 const colors = [document.getElementById('colorInput')];
+
+const ctx = document.getElementById('canvas').getContext('2d');
+
+let colorRecord;
+
+let gameRecord;
 
 let cacheObj = {
     record: '',
@@ -10,11 +18,24 @@ let cacheObj = {
     n: '',
 };
 
-// eslint-disable-next-line no-unused-vars
 let created = false;
 
+let onGame = false;
+
+let curSquare = 0;
+
+let startSquare = 0;
+
+let endSquare = 0;
+
+let pacMan = new Image();
+
+pacMan.src = '../assets/1.png';
+
+$("#pics").hide();
+
 function initiate() {
-    const ctx = document.getElementById('canvas').getContext('2d');
+    // const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     ctx.font = '96px serif';
     ctx.strokeText('Create your maze', 50, 400, 500);
@@ -22,7 +43,12 @@ function initiate() {
     document.getElementById('heartShaped').checked = false;
     $('#sizeRange').hide();
     $('#addColor').show();
+    $('#winMessage').hide();
     created = false;
+    onGame = false;
+    curSquare = 0;
+    startSquare = 0;
+    endSquare = 0;
 }
 
 function RGB(rgbColor) {
@@ -40,8 +66,6 @@ function RGB(rgbColor) {
  * acknowledgement: referred to https://css-tricks.com/
  * converting-color-spaces-in-javascript/
  */
-
-// eslint-disable-next-line no-unused-vars
 function HSL(rgbColor) {
     let rgb = rgbColor;
     while (rgb.length < 7) {
@@ -88,16 +112,16 @@ function HSL(rgbColor) {
     return [h, s, l];
 }
 
-function insideHeartCurve(i, n, ratio, offset) {
+function insideHeartCurve(i, n, ratio, offset, eqX, eqY) {
     const x = ((i % n) - offset) * ratio;
-    const y = (Math.floor(i / n) - offset) * ratio;
-    return -1 * (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) > 0;
+    const y = -1 * (Math.floor(i / n) - offset) * ratio;
+    return (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) < 0;
 }
 
-function makeAdjList(rawList, n, ratio, offset) {
+function makeAdjList(rawList, n, ratio, offset, eqX, eqY) {
     const result = [];
     for (let i = 0; i < rawList.length; i++) {
-        if (insideHeartCurve(rawList[i], n, ratio, offset)) {
+        if (insideHeartCurve(rawList[i], n, ratio, offset, eqX, eqY)) {
             result.push(rawList[i]);
         }
     }
@@ -105,7 +129,6 @@ function makeAdjList(rawList, n, ratio, offset) {
 }
 
 
-// eslint-disable-next-line no-unused-vars
 function addColor() {
     $('#colorBoard').append(`<div id="b${colors.length}" class="mb-1">
     <input onchange="if(created){render();}" class="moreColor" id="c${colors.length}" type="color"> Choose color
@@ -114,7 +137,7 @@ function addColor() {
     colors.push(document.getElementById(`c${colors.length}`));
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function deleteColor(index) {
     for (let i = index; i < colors.length - 1; i++) {
         colors[i].value = colors[i + 1].value;
@@ -127,6 +150,7 @@ function deleteColor(index) {
  * TODO: Change colorspace to RGB
  */
 function render() {
+    document.getElementById('playBtn').innerHTML = 'Press to start game';
     const {
         record, colored, heartShaped, consts, start, n,
     } = cacheObj;
@@ -142,8 +166,9 @@ function render() {
     const t = 700 / n;
     let x = 0;
     let y = 0;
-    const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
+    colorRecord = new Array(n * n);
+    colorRecord.fill(['rgb', 255, 255, 255]);
     console.time('render');
     if (colored) {
         const mul = parseInt(document.getElementById('colorRange').value, 10);
@@ -173,6 +198,7 @@ function render() {
             stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
             // eslint-disable-next-line no-nested-ternary
             ctx.fillStyle = option === 1 ? `rgb(${h}, ${s}, ${l})` : option === 2 ? `hsl(${h}, ${s}%, ${l}%)` : '';
+            colorRecord[curNode] = [option === 1 ? 'rgb' : 'hsl', h, s, l];
             ctx.fillRect((curNode % n) * t - 1, Math.floor(curNode / n) * t - 1, t + 1, t + 1);
             if (option === 1) {
                 h += deltaH;
@@ -271,13 +297,20 @@ function render() {
  * TODO: Arbitrary shape
  *       More generating algorithms & coloring algorithms
  */
-// eslint-disable-next-line no-unused-vars
+
 function createMaze(colored, heartShaped) {
     const n = parseInt(document.getElementById('rows').value, 10);
     const heartSize = document.getElementById('heartSizeRange').value;
     const ratio = (((100 - heartSize) / 50) ** 0.7) * 3.5 / n;
     const offset = n / 2;
-    const consts = [n, ratio, offset];
+    const eqX = nerdamer('x = t');
+    const eqY = nerdamer('y = sqrt(t)');
+    const consts = [n, ratio, offset, eqX, eqY];
+    created = false;
+    onGame = false;
+    curSquare = 0;
+    startSquare = 0;
+    endSquare = 0;
 
     if (n < 2) {
         alert('DID YOU READ THE NOTE??');
@@ -289,7 +322,7 @@ function createMaze(colored, heartShaped) {
     let counter = 0;
     // create adjacency list
     for (let i = 0; i < n * n; i++) {
-        if (heartShaped && !insideHeartCurve(i, n, ratio, offset)) {
+        if (heartShaped && !insideHeartCurve(i, n, ratio, offset, eqX, eqY)) {
             adjList[i] = [];
             continue;
         }
@@ -377,7 +410,7 @@ function createMaze(colored, heartShaped) {
     return 0;
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function preprocess() {
     const radios = document.getElementById('color');
     const colored = radios.checked;
@@ -386,7 +419,7 @@ function preprocess() {
     createMaze(colored, heartShaped);
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function showAndHide() {
     const radios = document.getElementById('color');
     if (radios.checked) {
@@ -395,6 +428,7 @@ function showAndHide() {
         $('.colorSelection').hide();
     }
 }
+
 
 function showAddColor() {
     const radios = document.getElementsByName('option');
@@ -411,7 +445,6 @@ function showAddColor() {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function showHideSizeRange() {
     const box = document.getElementById('heartShaped').checked;
     if (box) {
@@ -419,6 +452,111 @@ function showHideSizeRange() {
     } else {
         $('#sizeRange').hide();
     }
+}
+
+function onPressGameBtn(){
+    if(!created){
+        alert('create a maze first');
+        return;
+    }
+    if(onGame){
+        render();
+    }else{
+        document.getElementById('playBtn').innerHTML = 'Press to stop';
+        prepareForGame();
+    }
+    onGame = !onGame;
+    // if not on game
+}
+
+function handleSquare(from, to){
+    console.log(from + ' ' + to +  ` ${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}, ${colorRecord[from][3]})`);
+    const append = colorRecord[from][0] === 'hsl' ? '%' : '';
+    ctx.fillStyle = `${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}${append}, ${colorRecord[from][3]}${append})`;
+    const len = 700 /cacheObj.n;
+    ctx.fillRect((from % cacheObj.n + 0.05) * len, (Math.floor(from / cacheObj.n) + 0.05) * len, len * 0.9, len * 0.9);
+    ctx.drawImage(pacMan, (to % cacheObj.n + 0.1) * len, (Math.floor(to / cacheObj.n) + 0.1) * len, len * 0.8, len * 0.8);
+    console.log(pacMan);
+    if(to === endSquare){
+        $('#winMessage').show();
+        onGame = false;
+    }
+}
+
+function update(event){
+    if(!onGame) return;
+    if(event.keyCode === 37){ // left
+        if(cacheObj.record[curSquare].indexOf(curSquare - 1) != -1){
+            pacMan.src = './assets/pac-man.3.png';
+            handleSquare(curSquare, curSquare - 1);
+            curSquare = curSquare - 1;
+        }
+    }else if(event.keyCode === 39){ // right
+        if(cacheObj.record[curSquare].indexOf(curSquare + 1) != -1){
+            pacMan.src = './assets/pac-man.1.png';
+            handleSquare(curSquare, curSquare + 1);
+            curSquare = curSquare + 1;
+        }
+    }else if(event.keyCode === 38){ // up
+        if(cacheObj.record[curSquare].indexOf(curSquare - cacheObj.n) != -1){
+            pacMan.src = './assets/pac-man.4.png';
+            handleSquare(curSquare, curSquare - cacheObj.n);
+            curSquare = curSquare - cacheObj.n;
+        }
+    }else if(event.keyCode === 40){ // down
+        if(cacheObj.record[curSquare].indexOf(curSquare + cacheObj.n) != -1){
+            pacMan.src = './assets/pac-man.2.png';
+            handleSquare(curSquare, curSquare + cacheObj.n);
+            curSquare = curSquare + cacheObj.n;
+        }
+    }
+}
+
+function prepareForGame(){
+    // figure out starting point;
+    let start = 0;
+    let end = cacheObj.n * cacheObj.n - 1;
+    let haveStart = false;
+    let haveEnd = false;
+    for(let i = 0; i < cacheObj.record.length; i++){
+        if(cacheObj.record[start].filter(x => x !== -1).length > 0){
+            haveStart = true;
+        }
+        if(cacheObj.record[end].filter(x => x !== -1).length > 0){
+            haveEnd = true;
+        }
+        if(haveEnd && haveStart){
+            break;
+        }else{
+            if(!haveStart) start++;
+            if(!haveEnd) end--;
+        }
+    }
+    if(!haveStart || !haveEnd){
+        alert("You don't have a maze or your maze is too small.");
+        return;
+    }
+    // mark start & end point
+    curSquare = start;
+    startSquare = start;
+    endSquare = end;
+    const len = 700 / cacheObj.n;
+    // ctx.fillRect((start % cacheObj.n) * len, Math.floor(start / cacheObj.n) * len, len, len);
+
+    const startAdj = cacheObj.record[start][0];
+    if(startAdj === start + 1){
+        pacMan.src = './assets/pac-man.1.png';
+    }else if(startAdj === start + cacheObj.n){
+        pacMan.src = './assets/pac-man.2.png';
+    }else if(startAdj === start - 1){
+        pacMan.src = './assets/pac-man.3.png';
+    }else{
+        pacMan.src = './assets/pac-man.4.png';
+    }
+    console.log(pacMan);
+    ctx.drawImage(pacMan, (start % cacheObj.n + 0.1) * len, (Math.floor(start / cacheObj.n) + 0.1) * len, len * 0.8, len * 0.8);
+    console.log(pacMan);
+    ctx.fillRect((end % cacheObj.n) * len, Math.floor(end / cacheObj.n) * len, len, len);
 }
 
 window.onload = initiate;

@@ -8,7 +8,8 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>maze</title>
 </head>
-<body>
+<body onkeydown="update(event)">
+    <!-- 又来看源码 -->
     <div class="container mt-4">
         <div class="row">
             <div class="col-sm">
@@ -34,6 +35,13 @@
                     <li class="list-group-item">
                         <input id="rows" value="60" type="number"> rows/columns
                     </li>
+                    <li class="list-group-item"><button class="btn btn-info" id="playBtn" onclick="onPressGameBtn()">
+                        Press to start game
+                    </button></li>
+                    <li class="list-group-item" id="winMessage">
+                        You Won! <button class="btn btn-success" onclick="render();onPressGameBtn();$('#winMessage').hide();">Restart</button>
+                        <button class="btn btn-warning" onclick="render()">Clean</button>
+                    </li>
                     <li class="list-group-item">
                         <button class="btn btn-primary" onclick="preprocess(); created = true;">create</button>
                         <button class="btn btn-warning" onclick="initiate()">clear</button>
@@ -46,6 +54,14 @@
             </div>
         </div>
     </div>
+
+    <div id="pics">
+        <img src="./assets/pac-man.1.png">
+        <img src="./assets/pac-man.2.png">
+        <img src="./assets/pac-man.3.png">
+        <img src="./assets/pac-man.4.png">
+    </div>
+    
     
     
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -55,6 +71,8 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
-    <script src="render.js?version=4"></script>
+        <script src="./lib/nerdamer.core.bundle.js"></script>
+    <script src="./lib/Solve.bundle.js"></script>
+    <script src="render.js?version=7"></script>
 </body>
 </html>
