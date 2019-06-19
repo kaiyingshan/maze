@@ -5,6 +5,8 @@ const ctx = document.getElementById('canvas').getContext('2d');
 
 let colorRecord;
 
+let gameRecord;
+
 let cacheObj = {
     record: '',
     colored: '',
@@ -18,6 +20,16 @@ let created = false;
 
 let onGame = false;
 
+let curSquare = 0;
+
+let startSquare = 0;
+
+let endSquare = 0;
+
+let pacMan = new Image();
+
+pacMan.src = '../assets/1.png';
+
 function initiate() {
     // const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
@@ -29,6 +41,9 @@ function initiate() {
     $('#addColor').show();
     created = false;
     onGame = false;
+    curSquare = 0;
+    startSquare = 0;
+    endSquare = 0;
 }
 
 function RGB(rgbColor) {
@@ -95,18 +110,7 @@ function HSL(rgbColor) {
 function insideHeartCurve(i, n, ratio, offset, eqX, eqY) {
     const x = ((i % n) - offset) * ratio;
     const y = -1 * (Math.floor(i / n) - offset) * ratio;
-    // console.log(`${x } ${y}`);
-    // return (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) < 0;
-    const e = eqX.evaluate({ x });
-    const ts = e.solveFor('t');
-    if (!ts || ts.length === 0) {
-        return false;
-    }
-    const t = eval(ts[0].evaluate().toString());
-
-    const calcY = eval(eqY.evaluate({ t }).solveFor('y')[0].evaluate().toString());
-    if (isNaN(calcY)) return false;
-    return y > calcY;
+    return (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) < 0;
 }
 
 function makeAdjList(rawList, n, ratio, offset, eqX, eqY) {
@@ -159,7 +163,7 @@ function render() {
     let y = 0;
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
     colorRecord = new Array(n * n);
-    colorRecord.fill(['rbg', 255, 255, 255]);
+    colorRecord.fill(['rgb', 255, 255, 255]);
     console.time('render');
     if (colored) {
         const mul = parseInt(document.getElementById('colorRange').value, 10);
@@ -189,7 +193,7 @@ function render() {
             stack.push(...(record[curNode].filter(cur => cur !== -1 && (!visited[cur]))));
             // eslint-disable-next-line no-nested-ternary
             ctx.fillStyle = option === 1 ? `rgb(${h}, ${s}, ${l})` : option === 2 ? `hsl(${h}, ${s}%, ${l}%)` : '';
-            colorRecord[curNode] = [option === 1 ? 'rbg' : 'hsl', h, s, l];
+            colorRecord[curNode] = [option === 1 ? 'rgb' : 'hsl', h, s, l];
             ctx.fillRect((curNode % n) * t - 1, Math.floor(curNode / n) * t - 1, t + 1, t + 1);
             if (option === 1) {
                 h += deltaH;
@@ -297,6 +301,11 @@ function createMaze(colored, heartShaped) {
     const eqX = nerdamer('x = t');
     const eqY = nerdamer('y = sqrt(t)');
     const consts = [n, ratio, offset, eqX, eqY];
+    created = false;
+    onGame = false;
+    curSquare = 0;
+    startSquare = 0;
+    endSquare = 0;
 
     if (n < 2) {
         alert('DID YOU READ THE NOTE??');
@@ -455,29 +464,74 @@ function onPressGameBtn(){
     // if not on game
 }
 
-function updateGame(from, to){
+function handleSquare(from, to){
+    // console.log(from + ' ' + to +  ` ${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}, ${colorRecord[from][3]})`);
+    const append = colorRecord[from][0] === 'hsl' ? '%' : '';
+    ctx.fillStyle = `${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}${append}, ${colorRecord[from][3]}${append})`;
+    const len = 700 /cacheObj.n;
+    if(from !== startSquare) ctx.fillRect((from % cacheObj.n + 0.05) * len, (Math.floor(from / cacheObj.n) + 0.05) * len, len * 0.9, len * 0.9);
+    ctx.drawImage(pacMan, (to % cacheObj.n + 0.1) * len, (Math.floor(to / cacheObj.n) + 0.1) * len, len * 0.8, len * 0.8);
+    if(to === endSquare){
+        alert('you win!');
+    }
+}
+
+function update(event){
     if(!onGame) return;
-    
+    if(event.keyCode === 37){ // left
+        if(cacheObj.record[curSquare].indexOf(curSquare - 1) != -1){
+            handleSquare(curSquare, curSquare - 1);
+            curSquare = curSquare - 1;
+        }
+    }else if(event.keyCode === 39){ // right
+        if(cacheObj.record[curSquare].indexOf(curSquare + 1) != -1){
+            handleSquare(curSquare, curSquare + 1);
+            curSquare = curSquare + 1;
+        }
+    }else if(event.keyCode === 38){ // up
+        if(cacheObj.record[curSquare].indexOf(curSquare - cacheObj.n) != -1){
+            handleSquare(curSquare, curSquare - cacheObj.n);
+            curSquare = curSquare - cacheObj.n;
+        }
+    }else if(event.keyCode === 40){ // down
+        if(cacheObj.record[curSquare].indexOf(curSquare + cacheObj.n) != -1){
+            handleSquare(curSquare, curSquare + cacheObj.n);
+            curSquare = curSquare + cacheObj.n;
+        }
+    }
 }
 
 function prepareForGame(){
     // figure out starting point;
     let start = 0;
+    let end = cacheObj.n * cacheObj.n - 1;
     let haveStart = false;
+    let haveEnd = false;
     for(let i = 0; i < cacheObj.record.length; i++){
-        if(cacheObj.record[start].length > 0){
+        if(cacheObj.record[start].filter(x => x !== -1).length > 0){
             haveStart = true;
+        }
+        if(cacheObj.record[end].filter(x => x !== -1).length > 0){
+            haveEnd = true;
+        }
+        if(haveEnd && haveStart){
             break;
+        }else{
+            if(!haveStart) start++;
+            if(!haveEnd) end--;
         }
     }
-    if(!haveStart){
+    if(!haveStart || !haveEnd){
         alert("You don't have a maze or your maze is too small.");
         return;
     }
     // mark start & end point
+    curSquare = start;
+    startSquare = start;
+    endSquare = end;
     const len = 700 / cacheObj.n;
-    ctx.fillRect(0, 0, len, len);
-    ctx.fillRect(700 - len, 700 - len, len, len);
+    ctx.fillRect((start % cacheObj.n) * len, Math.floor(start / cacheObj.n) * len, len, len);
+    ctx.fillRect((end % cacheObj.n) * len, Math.floor(end / cacheObj.n) * len, len, len);
 }
 
 window.onload = initiate;
