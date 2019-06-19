@@ -470,13 +470,11 @@ function onPressGameBtn(){
 }
 
 function handleSquare(from, to){
-    console.log(from + ' ' + to +  ` ${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}, ${colorRecord[from][3]})`);
     const append = colorRecord[from][0] === 'hsl' ? '%' : '';
     ctx.fillStyle = `${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}${append}, ${colorRecord[from][3]}${append})`;
     const len = 700 /cacheObj.n;
     ctx.fillRect((from % cacheObj.n + 0.05) * len, (Math.floor(from / cacheObj.n) + 0.05) * len, len * 0.9, len * 0.9);
     ctx.drawImage(pacMan, (to % cacheObj.n + 0.1) * len, (Math.floor(to / cacheObj.n) + 0.1) * len, len * 0.8, len * 0.8);
-    console.log(pacMan);
     if(to === endSquare){
         $('#winMessage').show();
         onGame = false;
@@ -553,9 +551,7 @@ function prepareForGame(){
     }else{
         pacMan.src = './assets/pac-man.4.png';
     }
-    console.log(pacMan);
     ctx.drawImage(pacMan, (start % cacheObj.n + 0.1) * len, (Math.floor(start / cacheObj.n) + 0.1) * len, len * 0.8, len * 0.8);
-    console.log(pacMan);
     ctx.fillRect((end % cacheObj.n) * len, Math.floor(end / cacheObj.n) * len, len, len);
 }
 
