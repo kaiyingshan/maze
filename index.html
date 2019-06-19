@@ -9,6 +9,7 @@
     <title>maze</title>
 </head>
 <body onkeydown="update(event)">
+    <!-- 又来看源码 -->
     <div class="container mt-4">
         <div class="row">
             <div class="col-sm">
@@ -38,7 +39,7 @@
                         Press to start game
                     </button></li>
                     <li class="list-group-item" id="winMessage">
-                        You Won! <button>Restart</button><button>Clean</button>
+                        You Won! <button onclick="render();prepareForGame();$('#winMessage').hide();">Restart</button><button onclick="render()">Clean</button>
                     </li>
                     <li class="list-group-item">
                         <button class="btn btn-primary" onclick="preprocess(); created = true;">create</button>
@@ -52,6 +53,14 @@
             </div>
         </div>
     </div>
+
+    <div id="pics">
+        <img src="./assets/pac-man.1.png">
+        <img src="./assets/pac-man.2.png">
+        <img src="./assets/pac-man.3.png">
+        <img src="./assets/pac-man.4.png">
+    </div>
+    
     
     
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -63,6 +72,6 @@
         crossorigin="anonymous"></script>
         <script src="./lib/nerdamer.core.bundle.js"></script>
     <script src="./lib/Solve.bundle.js"></script>
-    <script src="render.js?version=6"></script>
+    <script src="render.js?version=7"></script>
 </body>
 </html>

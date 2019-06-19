@@ -1,4 +1,6 @@
 
+// 别看了，写得可烂了 ￣へ￣
+
 const colors = [document.getElementById('colorInput')];
 
 const ctx = document.getElementById('canvas').getContext('2d');
@@ -30,6 +32,8 @@ let pacMan = new Image();
 
 pacMan.src = '../assets/1.png';
 
+$("#pics").hide();
+
 function initiate() {
     // const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
@@ -39,6 +43,7 @@ function initiate() {
     document.getElementById('heartShaped').checked = false;
     $('#sizeRange').hide();
     $('#addColor').show();
+    $('#winMessage').hide();
     created = false;
     onGame = false;
     curSquare = 0;
@@ -465,14 +470,16 @@ function onPressGameBtn(){
 }
 
 function handleSquare(from, to){
-    // console.log(from + ' ' + to +  ` ${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}, ${colorRecord[from][3]})`);
+    console.log(from + ' ' + to +  ` ${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}, ${colorRecord[from][3]})`);
     const append = colorRecord[from][0] === 'hsl' ? '%' : '';
     ctx.fillStyle = `${colorRecord[from][0]}(${colorRecord[from][1]}, ${colorRecord[from][2]}${append}, ${colorRecord[from][3]}${append})`;
     const len = 700 /cacheObj.n;
-    if(from !== startSquare) ctx.fillRect((from % cacheObj.n + 0.05) * len, (Math.floor(from / cacheObj.n) + 0.05) * len, len * 0.9, len * 0.9);
+    ctx.fillRect((from % cacheObj.n + 0.05) * len, (Math.floor(from / cacheObj.n) + 0.05) * len, len * 0.9, len * 0.9);
     ctx.drawImage(pacMan, (to % cacheObj.n + 0.1) * len, (Math.floor(to / cacheObj.n) + 0.1) * len, len * 0.8, len * 0.8);
+    console.log(pacMan);
     if(to === endSquare){
-        alert('you win!');
+        $('#winMessage').show();
+        onGame = false;
     }
 }
 
@@ -480,21 +487,25 @@ function update(event){
     if(!onGame) return;
     if(event.keyCode === 37){ // left
         if(cacheObj.record[curSquare].indexOf(curSquare - 1) != -1){
+            pacMan.src = './assets/pac-man.3.png';
             handleSquare(curSquare, curSquare - 1);
             curSquare = curSquare - 1;
         }
     }else if(event.keyCode === 39){ // right
         if(cacheObj.record[curSquare].indexOf(curSquare + 1) != -1){
+            pacMan.src = './assets/pac-man.1.png';
             handleSquare(curSquare, curSquare + 1);
             curSquare = curSquare + 1;
         }
     }else if(event.keyCode === 38){ // up
         if(cacheObj.record[curSquare].indexOf(curSquare - cacheObj.n) != -1){
+            pacMan.src = './assets/pac-man.4.png';
             handleSquare(curSquare, curSquare - cacheObj.n);
             curSquare = curSquare - cacheObj.n;
         }
     }else if(event.keyCode === 40){ // down
         if(cacheObj.record[curSquare].indexOf(curSquare + cacheObj.n) != -1){
+            pacMan.src = './assets/pac-man.2.png';
             handleSquare(curSquare, curSquare + cacheObj.n);
             curSquare = curSquare + cacheObj.n;
         }
@@ -530,7 +541,21 @@ function prepareForGame(){
     startSquare = start;
     endSquare = end;
     const len = 700 / cacheObj.n;
-    ctx.fillRect((start % cacheObj.n) * len, Math.floor(start / cacheObj.n) * len, len, len);
+    // ctx.fillRect((start % cacheObj.n) * len, Math.floor(start / cacheObj.n) * len, len, len);
+
+    const startAdj = cacheObj.record[start][0];
+    if(startAdj === start + 1){
+        pacMan.src = './assets/pac-man.1.png';
+    }else if(startAdj === start + cacheObj.n){
+        pacMan.src = './assets/pac-man.2.png';
+    }else if(startAdj === start - 1){
+        pacMan.src = './assets/pac-man.3.png';
+    }else{
+        pacMan.src = './assets/pac-man.4.png';
+    }
+    console.log(pacMan);
+    ctx.drawImage(pacMan, (start % cacheObj.n + 0.1) * len, (Math.floor(start / cacheObj.n) + 0.1) * len, len * 0.8, len * 0.8);
+    console.log(pacMan);
     ctx.fillRect((end % cacheObj.n) * len, Math.floor(end / cacheObj.n) * len, len, len);
 }
 
