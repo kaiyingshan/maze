@@ -35,11 +35,12 @@
                     <li class="list-group-item">
                         <input id="rows" value="60" type="number"> rows/columns
                     </li>
-                    <li class="list-group-item"><button id="playBtn" onclick="onPressGameBtn()">
+                    <li class="list-group-item"><button class="btn btn-info" id="playBtn" onclick="onPressGameBtn()">
                         Press to start game
                     </button></li>
                     <li class="list-group-item" id="winMessage">
-                        You Won! <button onclick="render();prepareForGame();$('#winMessage').hide();">Restart</button><button onclick="render()">Clean</button>
+                        You Won! <button class="btn btn-success" onclick="render();onPressGameBtn();$('#winMessage').hide();">Restart</button>
+                        <button class="btn btn-warning" onclick="render()">Clean</button>
                     </li>
                     <li class="list-group-item">
                         <button class="btn btn-primary" onclick="preprocess(); created = true;">create</button>
