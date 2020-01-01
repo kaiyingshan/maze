@@ -166,7 +166,7 @@ function render() {
     colorRecord = new Array(n * n);
     colorRecord.fill(['rgb', 255, 255, 255]);
     console.time('render');
-    if (colored && colors.length !== 1) {
+    if (colored) {
         const mul = parseInt(document.getElementById('colorRange').value, 10);
         // const delta = mul * 2 / n;
 
@@ -223,10 +223,6 @@ function render() {
                 l = originalL;
             }
         }
-    }else if(colored){
-        const rgb = RGB(colors[0].value);
-        ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-        ctx.fillRect(1, 1, 698, 698);
     }
 
     ctx.fillStyle = 'black';
@@ -440,13 +436,13 @@ function showAddColor() {
         for (let i = 1; i < colors.length; i++) {
             $(`#b${i}`).show();
         }
+        render();
     } else {
         $("#addColor").hide();
         for (let i = 1; i < colors.length; i++) {
             $(`#b${i}`).remove();
             colors.pop();
         }
-        console.log(colors)
         render();
     }
 }
