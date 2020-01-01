@@ -1,6 +1,4 @@
 
-// 别看了，写得可烂了 ￣へ￣
-
 const colors = [document.getElementById('colorInput')];
 
 const ctx = document.getElementById('canvas').getContext('2d');
@@ -31,8 +29,6 @@ let endSquare = 0;
 let pacMan = new Image();
 
 pacMan.src = '../assets/1.png';
-
-$("#pics").hide();
 
 function initiate() {
     // const ctx = document.getElementById('canvas').getContext('2d');
@@ -112,16 +108,16 @@ function HSL(rgbColor) {
     return [h, s, l];
 }
 
-function insideHeartCurve(i, n, ratio, offset, eqX, eqY) {
+function insideHeartCurve(i, n, ratio, offset) {
     const x = ((i % n) - offset) * ratio;
     const y = -1 * (Math.floor(i / n) - offset) * ratio;
     return (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) < 0;
 }
 
-function makeAdjList(rawList, n, ratio, offset, eqX, eqY) {
+function makeAdjList(rawList, n, ratio, offset) {
     const result = [];
     for (let i = 0; i < rawList.length; i++) {
-        if (insideHeartCurve(rawList[i], n, ratio, offset, eqX, eqY)) {
+        if (insideHeartCurve(rawList[i], n, ratio, offset)) {
             result.push(rawList[i]);
         }
     }
@@ -293,19 +289,12 @@ function render() {
     console.timeEnd('render');
 }
 
-/**
- * TODO: Arbitrary shape
- *       More generating algorithms & coloring algorithms
- */
-
 function createMaze(colored, heartShaped) {
     const n = parseInt(document.getElementById('rows').value, 10);
     const heartSize = document.getElementById('heartSizeRange').value;
     const ratio = (((100 - heartSize) / 50) ** 0.7) * 3.5 / n;
     const offset = n / 2;
-    const eqX = nerdamer('x = t');
-    const eqY = nerdamer('y = sqrt(t)');
-    const consts = [n, ratio, offset, eqX, eqY];
+    const consts = [n, ratio, offset];
     created = false;
     onGame = false;
     curSquare = 0;
@@ -322,7 +311,7 @@ function createMaze(colored, heartShaped) {
     let counter = 0;
     // create adjacency list
     for (let i = 0; i < n * n; i++) {
-        if (heartShaped && !insideHeartCurve(i, n, ratio, offset, eqX, eqY)) {
+        if (heartShaped && !insideHeartCurve(i, n, ratio, offset)) {
             adjList[i] = [];
             continue;
         }
