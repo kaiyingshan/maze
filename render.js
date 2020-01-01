@@ -166,7 +166,7 @@ function render() {
     colorRecord = new Array(n * n);
     colorRecord.fill(['rgb', 255, 255, 255]);
     console.time('render');
-    if (colored) {
+    if (colored && colors.length !== 1) {
         const mul = parseInt(document.getElementById('colorRange').value, 10);
         // const delta = mul * 2 / n;
 
@@ -223,6 +223,10 @@ function render() {
                 l = originalL;
             }
         }
+    }else if(colored){
+        const rgb = RGB(colors[0].value);
+        ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+        ctx.fillRect(1, 1, 698, 698);
     }
 
     ctx.fillStyle = 'black';
@@ -295,7 +299,6 @@ function createMaze(colored, heartShaped) {
     const ratio = (((100 - heartSize) / 50) ** 0.7) * 3.5 / n;
     const offset = n / 2;
     const consts = [n, ratio, offset];
-    created = false;
     onGame = false;
     curSquare = 0;
     startSquare = 0;
@@ -342,6 +345,9 @@ function createMaze(colored, heartShaped) {
                 ? makeAdjList([i - 1, i + n, i + 1, i - n], ...consts)
                 : [i - 1, i + n, i + 1, i - n];
         }
+
+        created = true;
+
     }
 
     // a new adjacency node for querying connected edges
@@ -395,27 +401,35 @@ function createMaze(colored, heartShaped) {
     cacheObj = {
         record, colored, heartShaped, consts, start, n,
     };
-    render();
+    
     return 0;
 }
 
-
-function preprocess() {
+function create() {
     const radios = document.getElementById('color');
     const colored = radios.checked;
     const heartShaped = document.getElementById('heartShaped').checked;
 
     createMaze(colored, heartShaped);
+    render();
 }
 
-
-function showAndHide() {
+function showAndHideColorBlocks() {
     const radios = document.getElementById('color');
     if (radios.checked) {
         $('.colorSelection').show();
+        if (created) {
+          cacheObj.colored = true;
+          render();
+        }
     } else {
         $('.colorSelection').hide();
+        if (created) {
+          cacheObj.colored = false;
+          render();
+        }
     }
+    
 }
 
 
@@ -427,10 +441,13 @@ function showAddColor() {
             $(`#b${i}`).show();
         }
     } else {
-        $('#addColor').hide();
+        $("#addColor").hide();
         for (let i = 1; i < colors.length; i++) {
-            $(`#b${i}`).hide();
+            $(`#b${i}`).remove();
+            colors.pop();
         }
+        console.log(colors)
+        render();
     }
 }
 
