@@ -342,9 +342,8 @@ function createMaze(colored, heartShaped) {
                 : [i - 1, i + n, i + 1, i - n];
         }
 
-        created = true;
-
     }
+    created = true;
 
     // a new adjacency node for querying connected edges
     const record = [];
