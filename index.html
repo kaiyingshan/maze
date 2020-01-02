@@ -33,10 +33,22 @@
                             value="#f07070" onchange="if(created){render();}">
                         Choose color
                     </li>
-                    <li class="list-group-item"><input type="checkbox" id="heartShaped"
-                            onchange="showHideSizeRange()"><label for="heartShaped"> Heart Shaped</label></li>
+                    <li class="list-group-item">
+                        <div>
+                            <input type="radio" id="square" name="shape" checked>
+                            <label for="square">square</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="heart" name="shape">
+                            <label for="heart">heart</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="arbitrary" name="shape">
+                            <label for="arbitrary">arbitrary</label>
+                        </div>
+                    </li>
                     <li id="sizeRange" class="list-group-item">
-                        Change size of the Heart<input type="range" onchange="if(created)create()"
+                        Change size of the Heart<input type="range" onchange="if(meta.created)createMaze()"
                             id="heartSizeRange" title="Size of the heart (responsive)">
                     </li>
                     <li class="list-group-item">
@@ -78,7 +90,7 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
     <!-- <script src="render.js?version=1"></script> -->
-    <script src="Maze.js?version=1"></script>
+    <script src="Maze.js?version=2"></script>
 </body>
 
 </html>

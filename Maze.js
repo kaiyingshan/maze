@@ -49,14 +49,22 @@ class Maze{
     }
 
     // todo: make adj list according to musk function
-    makeAdjList(neigh, ratio, offset){
-        return [];
+    makeAdjList(neigh){
+        const result = [];
+        for (let i = 0; i < neigh.length; i++) {
+            if (this.muskFunc(neigh[i], this.N, this.ratio, this.offset)) {
+                result.push(neigh[i]);
+            }
+        }
+        return result;
     }
 
     createMaze(){
         const n = this.N;
         const ratio = (((100 - this.shapeSize) / 50) ** 0.7 * 3.5) / n;
         const offset = n / 2;
+        this.ratio = ratio;
+        this.offset = offset;
 
         const adjList = new Array(n * n);
 
@@ -69,12 +77,12 @@ class Maze{
             counter = n * n;
         }else{
             for (let i = 0; i < n * n; i++) {
-                if(!this.muskFunc(i, ratio, offset)){
+                if(!this.muskFunc(i, n, ratio, offset)){
                     adjList[i] = [];
                     continue;
                 }
                 counter++;
-                adjList[i] =  this.makeAdjList(this.neighbors(i), ratio, offset);        
+                adjList[i] =  this.makeAdjList(this.neighbors(i));     
             }
         }
 
@@ -87,7 +95,7 @@ class Maze{
         // pick a random node
         let start = Math.floor(Math.random() * n * n) % (n * n);
 
-        while(this.shape !== 'square' && !this.muskFunc(start, ratio, offset)){
+        while(this.shape !== 'square' && !this.muskFunc(start, n, ratio, offset)){
             start = Math.floor(Math.random() * n * n) % (n * n);
         }
 
@@ -127,14 +135,32 @@ class Maze{
         console.timeEnd('spanning tree generation');
 
         this.record = record;
-        this.ratio = ratio;
-        this.offset = offset;
         this.start = start;
     }
 
-    render(ctx, colorOption, colors){
-        ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
+    static RGB(rgbColor) {
+        let rgb = rgbColor;
+        while (rgb.length < 7) {
+            rgb += '0';
+        }
+        const r = parseInt(rgb.substring(1, 3), 16);
+        const g = parseInt(rgb.substring(3, 5), 16);
+        const b = parseInt(rgb.substring(5, 7), 16);
+        return [r, g, b];
+    }
+
+    renderColor(ctx, colorOption, colors){
+        if(colors.length === 1 && this.shape === 'square'){
+            const [r, g, b] = Maze.RGB(colors[0]);
+            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            ctx.fillRect(0, 0, meta.width, meta.height);
+        }
+    }
+
+    render(ctx){
+        ctx.clearRect(0, 0, meta.width, meta.height);
         const n = this.N, record = this.record;
+        const ratio = this.ratio, offset = this.offset;
         const t = 700 / n;
         let x = 0, y = 0;
 
@@ -145,13 +171,13 @@ class Maze{
         y += t;
         // every time move to the right bottom of its next cell and set the value
         for (let i = 0; i < n * n; i++) {
-            if (this.shape !== 'square' && this.muskFunc(i, ...consts)) {
+            if (this.shape !== 'square' && this.muskFunc(i, n, ratio, offset)) {
                 ctx.moveTo(x - t, y - t);
-                if (!this.muskFunc(i - 1, ...consts)) {
+                if (!this.muskFunc(i - 1, n, ratio, offset)) {
                     ctx.lineTo(x - t, y);
                 }
                 ctx.moveTo(x - t, y - t);
-                if (!this.muskFunc(i - n, ...consts)) {
+                if (!this.muskFunc(i - n, n, ratio, offset)) {
                     ctx.lineTo(x, y - t);
                 }
                 ctx.moveTo(x, y);
@@ -161,7 +187,7 @@ class Maze{
                 continue;
             } else if ((i + 1) % n === 0) { // if right
                 if (record[i].indexOf(i + n) === -1
-                    && (this.shape === 'square' || this.muskFunc(i, ...consts))) {
+                    && (this.shape === 'square' || this.muskFunc(i, n, ratio, offset))) {
                     ctx.lineTo(x - t, y);
                 }
                 ctx.moveTo(t, y + t);
@@ -169,19 +195,19 @@ class Maze{
                 y += t;
             } else if (i >= n * (n - 1)) { // if bottom
                 if (record[i].indexOf(i + 1) === -1
-                    && (this.shape === 'square' || this.muskFunc(i, ...consts))) {
+                    && (this.shape === 'square' || this.muskFunc(i, n, ratio, offset))) {
                     ctx.lineTo(x, y - t);
                 }
                 ctx.moveTo(x + t, y);
                 x += t;
             } else {
                 if (record[i].indexOf(i + n) === -1
-                    && (this.shape === 'square' || this.muskFunc(i, ...consts))) {
+                    && (this.shape === 'square' || this.muskFunc(i, n, ratio, offset))) {
                     ctx.lineTo(x - t, y);
                 }
                 ctx.moveTo(x, y);
                 if (record[i].indexOf(i + 1) === -1
-                    && (this.shape === 'square' || this.muskFunc(i, ...consts))) {
+                    && (this.shape === 'square' || this.muskFunc(i, n, ratio, offset))) {
                     ctx.lineTo(x, y - t);
                 }
                 ctx.moveTo(x + t, y);
@@ -202,23 +228,47 @@ class Maze{
     }
 }
 
+function insideHeartCurve(i, n, ratio, offset) {
+    const x = ((i % n) - offset) * ratio;
+    const y = -1 * (Math.floor(i / n) - offset) * ratio;
+    return (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) < 0;
+}
+
+const meta = {
+    width: 700,
+    height: 700,
+    created: false
+}
+
 function initiate() {
     const ctx = document.getElementById('canvas').getContext('2d');
-    ctx.clearRect(0, 0, document.getElementById('canvas').width, document.getElementById('canvas').height);
+    ctx.clearRect(0, 0, meta.width, meta.height);
     ctx.font = '96px serif';
     ctx.strokeText('Create your maze', 50, 400, 500);
     ctx.strokeRect(0, 0, 700, 700);
-    document.getElementById('heartShaped').checked = false;
-    $('#sizeRange').hide();
+
+    // $('#sizeRange').hide();
     $('#addColor').show();
     $('#winMessage').hide();
 }
 
 function createMaze(){
     const n = parseInt(document.getElementById('rows').value);
-    const maze = new Maze(n, false, 'square', 0, ()=>0);
+    const shapes = document.getElementsByName('shape');
+    const shape = shapes[0].checked ? 'square' : shapes[1].checked ? 
+                'heart' : 'arbitrary';
+    const size = parseInt(document.getElementById('heartSizeRange').value);
+
+    let func;
+    if(shape === 'heart'){
+        func = insideHeartCurve;
+    }
+
+    const maze = new Maze(n, false, shape, size, func);
     const ctx = document.getElementById('canvas').getContext('2d');
     maze.render(ctx, 0, []);
+
+    meta.created = true;
 }
 
 window.onload = initiate;
