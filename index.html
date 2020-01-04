@@ -48,8 +48,14 @@
                         </div>
                     </li>
                     <li id="sizeRange" class="list-group-item">
-                        Change size of the Heart<input type="range" onchange="if(meta.created)createMaze()"
+                        Change size<input type="range" onchange="if(meta.created)createMaze()"
                             id="heartSizeRange" title="Size of the heart (responsive)">
+                    </li>
+                    <li class="list-group-item">
+                        <input id="imageInput" type="file" accept="image/png, image/jpeg" onchange="uploadImage()">
+                        <div id="imageView" style="padding-top: 10px;">
+                            <p>Upload Image</p>
+                        </div>
                     </li>
                     <li class="list-group-item">
                         <input id="rows" value="60" type="number"> rows/columns
@@ -70,7 +76,7 @@
 
             </div>
             <div class="col-sm-8">
-                <canvas id="canvas" height="700" width="700"></canvas>
+                <canvas id="canvas" height="701" width="701"></canvas>
             </div>
         </div>
     </div>
@@ -90,7 +96,7 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
     <!-- <script src="render.js?version=1"></script> -->
-    <script src="Maze.js?version=2"></script>
+    <script src="Maze.js?version=3"></script>
 </body>
 
 </html>

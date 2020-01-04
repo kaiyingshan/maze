@@ -1,15 +1,15 @@
 class Maze{
-    constructor(n, colored, shape, shapeSize, muskFunc){
+    constructor(n, colored, shape, shapeSize, maskFunc){
         this.N = n;
         this.record = null,
         this.shapeSize = shapeSize;
         this.colorRecord = null;
         this.colored = colored,
-        this.shape = shape, // square, heart, musk
+        this.shape = shape, // square, heart, mask
         this.ratio = null,
         this.offset = null,
         this.start = null,
-        this.muskFunc = muskFunc;
+        this.maskFunc = maskFunc;
 
         // game information
         this.onGame = false;
@@ -48,11 +48,10 @@ class Maze{
         }
     }
 
-    // todo: make adj list according to musk function
     makeAdjList(neigh){
         const result = [];
         for (let i = 0; i < neigh.length; i++) {
-            if (this.muskFunc(neigh[i], this.N, this.ratio, this.offset)) {
+            if (this.maskFunc(neigh[i], this.N, this.ratio, this.offset)) {
                 result.push(neigh[i]);
             }
         }
@@ -77,7 +76,7 @@ class Maze{
             counter = n * n;
         }else{
             for (let i = 0; i < n * n; i++) {
-                if(!this.muskFunc(i, n, ratio, offset)){
+                if(!this.maskFunc(i, n, ratio, offset)){
                     adjList[i] = [];
                     continue;
                 }
@@ -95,7 +94,7 @@ class Maze{
         // pick a random node
         let start = Math.floor(Math.random() * n * n) % (n * n);
 
-        while(this.shape !== 'square' && !this.muskFunc(start, n, ratio, offset)){
+        while(this.shape !== 'square' && !this.maskFunc(start, n, ratio, offset)){
             start = Math.floor(Math.random() * n * n) % (n * n);
         }
 
@@ -171,13 +170,13 @@ class Maze{
         y += t;
         // every time move to the right bottom of its next cell and set the value
         for (let i = 0; i < n * n; i++) {
-            if (this.shape !== 'square' && this.muskFunc(i, n, ratio, offset)) {
+            if (this.shape !== 'square' && this.maskFunc(i, n, ratio, offset)) {
                 ctx.moveTo(x - t, y - t);
-                if (!this.muskFunc(i - 1, n, ratio, offset)) {
+                if (!this.maskFunc(i - 1, n, ratio, offset)) {
                     ctx.lineTo(x - t, y);
                 }
                 ctx.moveTo(x - t, y - t);
-                if (!this.muskFunc(i - n, n, ratio, offset)) {
+                if (!this.maskFunc(i - n, n, ratio, offset)) {
                     ctx.lineTo(x, y - t);
                 }
                 ctx.moveTo(x, y);
@@ -187,7 +186,7 @@ class Maze{
                 continue;
             } else if ((i + 1) % n === 0) { // if right
                 if (record[i].indexOf(i + n) === -1
-                    && (this.shape === 'square' || this.muskFunc(i, n, ratio, offset))) {
+                    && (this.shape === 'square' || this.maskFunc(i, n, ratio, offset))) {
                     ctx.lineTo(x - t, y);
                 }
                 ctx.moveTo(t, y + t);
@@ -195,19 +194,19 @@ class Maze{
                 y += t;
             } else if (i >= n * (n - 1)) { // if bottom
                 if (record[i].indexOf(i + 1) === -1
-                    && (this.shape === 'square' || this.muskFunc(i, n, ratio, offset))) {
+                    && (this.shape === 'square' || this.maskFunc(i, n, ratio, offset))) {
                     ctx.lineTo(x, y - t);
                 }
                 ctx.moveTo(x + t, y);
                 x += t;
             } else {
                 if (record[i].indexOf(i + n) === -1
-                    && (this.shape === 'square' || this.muskFunc(i, n, ratio, offset))) {
+                    && (this.shape === 'square' || this.maskFunc(i, n, ratio, offset))) {
                     ctx.lineTo(x - t, y);
                 }
                 ctx.moveTo(x, y);
                 if (record[i].indexOf(i + 1) === -1
-                    && (this.shape === 'square' || this.muskFunc(i, n, ratio, offset))) {
+                    && (this.shape === 'square' || this.maskFunc(i, n, ratio, offset))) {
                     ctx.lineTo(x, y - t);
                 }
                 ctx.moveTo(x + t, y);
@@ -228,16 +227,111 @@ class Maze{
     }
 }
 
+
+class MaskImage{
+    
+
+    constructor(image, height, width, n, thresh){
+        this.height = height;
+        this.width = width;
+        this.image = image;
+        [this.mask, this.maskHeight, this.maskWidth] = this.getMask(n, thresh);  
+    }
+
+    get(x){
+        return this.mask[x] === 1 ? true : false;
+    }
+
+    resize(height, width){
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        context.drawImage(this.image, 0, 0, width, height);
+        return context.getImageData(0, 0, width, height);
+    }
+
+    getMask(n, thresh){
+        const height = Math.floor(n / this.width * this.height);
+        const data = this.resize(height, n);
+
+        const len = height * n;
+
+        const result = new Uint8Array(len);
+
+        for(let i = 0; i < len * 4; i += 4){
+            result[i / 4] = data.data[i] + data.data[i + 1] + data.data[i + 2] >= thresh * 3 ? 0 : 1;
+        }
+        return [result, height, n];
+    }
+}
+
+MaskImage.created = false;
+MaskImage.mask = null;
+
 function insideHeartCurve(i, n, ratio, offset) {
     const x = ((i % n) - offset) * ratio;
     const y = -1 * (Math.floor(i / n) - offset) * ratio;
     return (((x ** 2) + (y ** 2) - 1) ** 3) - (x ** 2) * (y ** 3) < 0;
 }
 
+function insideImageMask(i, n, ratio, offset){
+    return MaskImage.mask.get(i);
+}
+
 const meta = {
     width: 700,
     height: 700,
     created: false
+};
+
+function uploadImage(){
+    const preview = document.getElementById('imageView');
+    const files = document.getElementById('imageInput').files;
+    if(!files || !files[0]){
+        return;
+    }
+
+    while(preview.firstChild){
+        preview.removeChild(preview.firstChild);
+    }
+
+    const image = document.createElement('img');
+    image.width = 150;
+    image.src = window.URL.createObjectURL(files[0]);
+    image.id = 'image';
+
+    const btn = document.createElement('button');
+    btn.innerHTML = 'Process this image';
+    btn.onclick = processImage;
+
+    const cancel = document.createElement('button');
+    cancel.innerHTML = 'Cancel';
+    cancel.onclick = cancelImage;
+
+    preview.appendChild(image);
+    preview.appendChild(document.createElement('br'))
+    preview.appendChild(btn);
+    preview.appendChild(cancel);
+}
+
+function cancelImage(){
+    const preview = document.getElementById('imageView');
+    while (preview.firstChild) {
+        preview.removeChild(preview.firstChild);
+    }
+    const p = document.createElement('p');
+    p.innerHTML = 'Upload Image';
+    preview.appendChild(p);
+}
+
+function processImage(){
+    const img = document.getElementById('image')
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.height = img.height;
+    canvas.width = img.width;
+    context.drawImage(img, 0, 0);
+    const data = context.getImageData(0, 0, img.width, img.height);
+    meta.imageData = data.data;
 }
 
 function initiate() {
@@ -262,11 +356,18 @@ function createMaze(){
     let func;
     if(shape === 'heart'){
         func = insideHeartCurve;
+    }else if(shape === 'arbitrary'){
+        const image = document.getElementById('image');
+        const m = new MaskImage(image, image.height, image.width, n, 255);
+        MaskImage.mask = m;
+        console.log(m);
+        console.log(m.height, m.width);
+        func = insideImageMask;
     }
 
     const maze = new Maze(n, false, shape, size, func);
     const ctx = document.getElementById('canvas').getContext('2d');
-    maze.render(ctx, 0, []);
+    maze.render(ctx);
 
     meta.created = true;
 }
