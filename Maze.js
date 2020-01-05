@@ -181,32 +181,68 @@ class Maze{
                 }
                 ctx.moveTo(x, y);
             }
+
             // if right and bottom
             if ((i + 1) % n === 0 && i >= n * (n - 1)) {
-                continue;
-            } else if ((i + 1) % n === 0) { // if right
-                if (record[i].indexOf(i + n) === -1
-                    && (this.shape === 'square' || this.maskFunc(i, n, ratio, offset))) {
+                if (this.shape === 'square' || this.maskFunc(i, n, ratio, offset)) {
+                    ctx.lineTo(x, y - t);
+                    ctx.moveTo(x, y);
                     ctx.lineTo(x - t, y);
+                }
+            } else if ((i + 1) % n === 0) { // if right
+                if (this.shape === 'square' || this.maskFunc(i, n, ratio, offset)){
+                    if(record[i].indexOf(i + n) === -1){
+                        ctx.lineTo(x - t, y);
+                        ctx.moveTo(x, y)
+                    }
+                    if(i < n){
+                        ctx.moveTo(x, y - t);
+                        ctx.lineTo(x - t, y - t);
+                        ctx.moveTo(x, y);
+                    }
+                    ctx.lineTo(x, y - t);
                 }
                 ctx.moveTo(t, y + t);
                 x = t;
                 y += t;
             } else if (i >= n * (n - 1)) { // if bottom
-                if (record[i].indexOf(i + 1) === -1
-                    && (this.shape === 'square' || this.maskFunc(i, n, ratio, offset))) {
-                    ctx.lineTo(x, y - t);
+                if (this.shape === 'square' || this.maskFunc(i, n, ratio, offset)){
+                    if (record[i].indexOf(i + 1) === -1){
+                        ctx.lineTo(x, y - t);
+                        ctx.moveTo(x, y);
+                    }
+                    if(i % n === 0){
+                        ctx.moveTo(x - t, y);
+                        ctx.lineTo(x - t, y - t);
+                        ctx.moveTo(x, y);
+                    }
+                    ctx.lineTo(x - t, y);
                 }
                 ctx.moveTo(x + t, y);
                 x += t;
             } else {
-                if (record[i].indexOf(i + n) === -1
-                    && (this.shape === 'square' || this.maskFunc(i, n, ratio, offset))) {
-                    ctx.lineTo(x - t, y);
+                const flag = this.shape === 'square' || this.maskFunc(i, n, ratio, offset);
+                if(flag){
+                    if(i % n === 0){
+                        ctx.moveTo(x - t, y);
+                        ctx.lineTo(x - t, y - t);
+                        ctx.moveTo(x, y);
+                    }
+
+                    if(i < n){
+                        ctx.moveTo(x, y - t);
+                        ctx.lineTo(x - t, y - t);
+                        ctx.moveTo(x, y);
+                    }
                 }
-                ctx.moveTo(x, y);
+
+                if (record[i].indexOf(i + n) === -1
+                    && (flag)) {
+                    ctx.lineTo(x - t, y);
+                    ctx.moveTo(x, y);
+                }
                 if (record[i].indexOf(i + 1) === -1
-                    && (this.shape === 'square' || this.maskFunc(i, n, ratio, offset))) {
+                    && (flag)) {
                     ctx.lineTo(x, y - t);
                 }
                 ctx.moveTo(x + t, y);
