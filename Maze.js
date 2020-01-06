@@ -335,7 +335,7 @@ class MaskImage{
         const result = new Uint8Array(len);
 
         for(let i = 0; i < len * 4; i += 4){
-            result[i / 4] = data.data[i] + data.data[i + 1] + data.data[i + 2] >= thresh * 3 ? 0 : 1;
+            result[i / 4] = data.data[i] + data.data[i + 1] + data.data[i + 2] >= thresh * 3 || data.data[i + 3] === 0 ? 0 : 1;
         }
         return [result, height, n];
     }
