@@ -92,49 +92,90 @@ class Maze{
         }
 
         // pick a random node
-        let start = Math.floor(Math.random() * n * n) % (n * n);
+        // let start = Math.floor(Math.random() * n * n) % (n * n);
 
-        while(this.shape !== 'square' && !this.maskFunc(start, n, ratio, offset)){
-            start = Math.floor(Math.random() * n * n) % (n * n);
-        }
+        // while(this.shape !== 'square' && !this.maskFunc(start, n, ratio, offset)){
+        //     start = Math.floor(Math.random() * n * n) % (n * n);
+        // }
 
-        const knowns = [start];
         const knownNodes = new Uint8Array(n * n);
-        knownNodes[start] = 1;
-        let treeCounter = 1;
+        const visited = new Uint8Array(n * n);
+        const starts = [];
+        // knownNodes[start] = 1;
 
         console.time('spanning tree generation');
-        while (treeCounter !== counter) {
-            let chosenNode = knowns[Math.floor(Math.random() * treeCounter)];
-            let adj = adjList[chosenNode];
-            let next = adj[Math.floor(Math.random() * adj.length)];
 
-            while (knownNodes[next]) {
-                chosenNode = knowns[Math.floor(Math.random() * treeCounter)];
-                adj = adjList[chosenNode];
-                next = adj[Math.floor(Math.random() * adj.length)];
-            }
+        for(let i = 0; i < n * n; i++){
+            const flag = this.shape !== 'arbitrary' || (this.maskFunc(i) && !knownNodes[i]);
+            if(!flag) continue;
+            let start = i;
 
-            for (let i = 0; i < 4; i++) {
-                if (record[chosenNode][i] === -1) {
-                    record[chosenNode][i] = next;
-                    break;
+            if(this.shape !== 'arbitrary'){
+                start = Math.floor(Math.random() * n * n) % (n * n);
+
+                while(this.shape !== 'square' && !this.maskFunc(start, n, ratio, offset)){
+                    start = Math.floor(Math.random() * n * n) % (n * n);
                 }
             }
-            for (let i = 0; i < 4; i++) {
-                if (record[next][i] === -1) {
-                    record[next][i] = chosenNode;
-                    break;
+
+            starts.push(start);
+            visited[start] = 1;
+            const inCounter = this.shape === 'arbitrary' ? this.dfsCount(adjList, start, visited) : counter;
+            let treeCounter = 1;
+            const knowns = [start];
+            knownNodes[start] = 1;
+
+            while (treeCounter !== inCounter) {
+                let chosenNode = knowns[Math.floor(Math.random() * treeCounter)];
+                let adj = adjList[chosenNode];
+                let next = adj[Math.floor(Math.random() * adj.length)];
+
+                while (knownNodes[next]) {
+                    chosenNode = knowns[Math.floor(Math.random() * treeCounter)];
+                    adj = adjList[chosenNode];
+                    next = adj[Math.floor(Math.random() * adj.length)];
                 }
+
+                for (let i = 0; i < 4; i++) {
+                    if (record[chosenNode][i] === -1) {
+                        record[chosenNode][i] = next;
+                        break;
+                    }
+                }
+                for (let i = 0; i < 4; i++) {
+                    if (record[next][i] === -1) {
+                        record[next][i] = chosenNode;
+                        break;
+                    }
+                }
+                knownNodes[next] = 1;
+                knowns.push(next);
+                treeCounter++;
             }
-            knownNodes[next] = 1;
-            knowns.push(next);
-            treeCounter++;
+
+            if(this.shape !== 'arbitrary'){
+                break;
+            }
         }
+
+        
         console.timeEnd('spanning tree generation');
 
         this.record = record;
-        this.start = start;
+        this.start = starts;
+    }
+
+    dfsCount(adjList, start, visited){
+        visited[start] = true;
+        const adj = adjList[start];
+        let count = 1;
+        for(let i = 0; i < adj.length; i++){
+            const neigh = adj[i];
+            if(!visited[neigh]){
+                count += this.dfsCount(adjList, neigh, visited);
+            }
+        }
+        return count;
     }
 
     static RGB(rgbColor) {
@@ -396,8 +437,6 @@ function createMaze(){
         const image = document.getElementById('image');
         const m = new MaskImage(image, image.height, image.width, n, 255);
         MaskImage.mask = m;
-        console.log(m);
-        console.log(m.height, m.width);
         func = insideImageMask;
     }
 
