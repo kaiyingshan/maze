@@ -346,7 +346,6 @@ class Maze{
     }
 }
 
-
 class MaskImage{
     constructor(image, height, width, n, thresh){
         this.height = height;
@@ -417,18 +416,8 @@ function uploadImage(){
     image.src = window.URL.createObjectURL(files[0]);
     image.id = 'image';
 
-    const btn = document.createElement('button');
-    btn.innerHTML = 'Process this image';
-    btn.onclick = processImage;
-
-    const cancel = document.createElement('button');
-    cancel.innerHTML = 'Cancel';
-    cancel.onclick = cancelImage;
-
     preview.appendChild(image);
     preview.appendChild(document.createElement('br'))
-    preview.appendChild(btn);
-    preview.appendChild(cancel);
 }
 
 function cancelImage(){
@@ -475,11 +464,7 @@ function addColor(r, g, b) {
     col.className = 'mr-1';
     col.name = 'colorInput';
     col.value = color;
-    col.onchange = () => {
-        if(meta.created){
-            renderMaze(meta.maze);
-        }
-    }
+    col.onchange = update;
 
     const div = document.createElement('div');
     div.className = 'mb-1';
@@ -535,6 +520,10 @@ function createMaze(){
         func = insideHeartCurve;
     }else if(shape === 'arbitrary'){
         const image = document.getElementById('image');
+        if(!image){
+            alert('Input a mask image first');
+            return;
+        }
         const m = new MaskImage(image, image.height, image.width, n, 255);
         MaskImage.mask = m;
         func = insideImageMask;
@@ -549,3 +538,34 @@ function createMaze(){
 }
 
 window.onload = initiate;
+
+// code for ui only
+function showHideColorBlocks(){
+    if(document.getElementById('color').checked){
+        $('.colorBlock').show();
+    }else{
+        $('.colorBlock').hide();
+    }
+    update();
+}
+
+function switchShape(){
+    const radios = document.getElementsByName('shape');
+    if(radios[0].checked){
+        $('.heartBlock').hide();
+        $('.arbitraryBlock').hide();
+    }else if(radios[1].checked){
+        $('.heartBlock').show();
+        $('.arbitraryBlock').hide();
+    }else{
+        $('.heartBlock').hide();
+        $('.arbitraryBlock').show();
+    }
+}
+
+// small helper function
+function update(){
+    if (meta.created) {
+        renderMaze(meta.maze);
+    }
+}

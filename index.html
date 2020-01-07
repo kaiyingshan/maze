@@ -11,7 +11,7 @@
     <title>maze</title>
 </head>
 
-<body onkeydown="update(event)">
+<body">
     <!-- modal -->
     <div class="modal fade" id="colorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
         <div class="modal-dialog" role="document">
@@ -26,8 +26,8 @@
                     <input type="color" id="sc"><label for="sc">Click to choose color</label>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary"  onclick="addColor();if(meta.created)renderMaze(meta.maze)" data-dismiss="modal">AddColor</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-info"  onclick="addColor();if(meta.created)renderMaze(meta.maze)" data-dismiss="modal">AddColor</button>
                 </div>
             </div>
         </div>
@@ -38,42 +38,38 @@
         <div class="row">
             <div class="col-sm-4">
                 <ul class="list-group">
-                    <li class="list-group-item"><input type="checkbox" id="color" checked
-                            onchange="showAndHideColorBlocks()">Colored</li>
-                    <li class="colorSelection list-group-item">
-                        Rate of change <input id="colorRate" class="ml-4" onchange="if(created){render();}"
-                            type="range" title="rate of change of color (responsive)"><br>
-                        <input id="option1" type="radio" onchange="showAddColor()" checked name="option"><label
-                            for="option1"> Arbitrary Color </label>
-                        <input id="option2" class="ml-4" type="radio" onchange="showAddColor()" name="option"><label
-                            for="option2"> Color and White </label>
+                    <li class="list-group-item title"><input type="checkbox" id="color" checked
+                            onchange="showHideColorBlocks()">Colored</li>
+                    <li class="colorSelection list-group-item colorBlock">
+                        Rate of change <input id="colorRate" class="ml-4" onchange="update()"
+                            type="range" title="rate of change of color (responsive)">
                     </li>
-                    <li id="colorBoard" class="colorSelection list-group-item">
-                        <div id="addColor"><button class="btn btn-primary mb-1" data-toggle="modal" data-target="#colorModal">Add more colors</button>
-                        <button class="btn btn-primary mb-1" onclick="addColor(Math.random(), Math.random(), Math.random());if(meta.created){renderMaze(meta.maze)};">Random</button><br></div>
+                    <li id="colorBoard" class="colorSelection list-group-item colorBlock">
+                        <div id="addColor"><button class="btn btn-info mb-1" data-toggle="modal" data-target="#colorModal">Add more colors</button>
+                        <button class="btn btn-info mb-1" onclick="addColor(Math.random(), Math.random(), Math.random());if(meta.created){renderMaze(meta.maze)};">Random</button><br></div>
                         <input class="mb-1" name="colorInput" title="change color (responsive)" type="color"
                             value="#ddeead" onchange="if(meta.created){renderMaze(meta.maze);}">
                         Choose color
                     </li>
-                    <li class="list-group-item">
+                    <li class="list-group-item title">
                         <div>
-                            <input type="radio" id="square" name="shape" checked>
+                            <input onchange="switchShape()" type="radio" id="square" name="shape" checked>
                             <label for="square">square</label>
                         </div>
                         <div>
-                            <input type="radio" id="heart" name="shape">
+                            <input onchange="switchShape()" type="radio" id="heart" name="shape">
                             <label for="heart">heart</label>
                         </div>
                         <div>
-                            <input type="radio" id="arbitrary" name="shape">
+                            <input onchange="switchShape()"  type="radio" id="arbitrary" name="shape">
                             <label for="arbitrary">arbitrary</label>
                         </div>
                     </li>
-                    <li id="sizeRange" class="list-group-item">
+                    <li style="display: none;" id="sizeRange" class="list-group-item heartBlock">
                         Change size<input type="range" onchange="if(meta.created)createMaze()"
                             id="heartSizeRange" title="Size of the heart (responsive)">
                     </li>
-                    <li class="list-group-item">
+                    <li style="display: none;" class="list-group-item arbitraryBlock">
                         <input id="imageInput" type="file" accept="image/png, image/jpeg" onchange="uploadImage()">
                         <div id="imageView" style="padding-top: 10px;">
                             <p>Upload Image</p>
@@ -82,16 +78,8 @@
                     <li class="list-group-item">
                         <input id="rows" value="60" type="number"> rows/columns
                     </li>
-                    <li class="list-group-item"><button class="btn btn-info" id="playBtn" onclick="onPressGameBtn()">
-                            Press to start game
-                        </button></li>
-                    <li class="list-group-item" id="winMessage">
-                        You Won! <button class="btn btn-success"
-                            onclick="render();onPressGameBtn();$('#winMessage').hide();">Restart</button>
-                        <button class="btn btn-warning" onclick="render()">Clean</button>
-                    </li>
                     <li class="list-group-item">
-                        <button class="btn btn-primary" onclick="createMaze()">create</button>
+                        <button class="btn btn-info" onclick="createMaze()">create</button>
                         <button class="btn btn-warning" onclick="initiate()">clear</button>
                     </li>
                 </ul>
@@ -119,6 +107,14 @@
         crossorigin="anonymous"></script>
     <!-- <script src="render.js?version=1"></script> -->
     <script src="Maze.js?version=4"></script>
+    <style>
+    .title{
+        background-color: #eeeeee;
+    }
+    .list-group-item{
+        border-radius: 0 !important;
+    }
+    </style>
 </body>
 
 </html>
