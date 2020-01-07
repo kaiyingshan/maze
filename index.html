@@ -12,6 +12,28 @@
 </head>
 
 <body onkeydown="update(event)">
+    <!-- modal -->
+    <div class="modal fade" id="colorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Choose Color</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="color" id="sc"><label for="sc">Click to choose color</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary"  onclick="addColor();if(meta.created)renderMaze(meta.maze)" data-dismiss="modal">AddColor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- body -->
     <div class="container mt-4">
         <div class="row">
             <div class="col-sm-4">
@@ -27,10 +49,10 @@
                             for="option2"> Color and White </label>
                     </li>
                     <li id="colorBoard" class="colorSelection list-group-item">
-                        <div id="addColor"><button class="btn btn-primary mb-1" onclick="addColor()">Add more
-                                colors</button><br></div>
+                        <div id="addColor"><button class="btn btn-primary mb-1" data-toggle="modal" data-target="#colorModal">Add more colors</button>
+                        <button class="btn btn-primary mb-1" onclick="addColor(Math.random(), Math.random(), Math.random());if(meta.created){renderMaze(meta.maze)};">Random</button><br></div>
                         <input class="mb-1" name="colorInput" title="change color (responsive)" type="color"
-                            value="#f07070" onchange="if(created){render();}">
+                            value="#ddeead" onchange="if(meta.created){renderMaze(meta.maze);}">
                         Choose color
                     </li>
                     <li class="list-group-item">

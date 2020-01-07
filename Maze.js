@@ -213,15 +213,20 @@ class Maze{
                 ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
                 colorRecord[cur] = ['rgb', r, g, b];
                 ctx.fillRect((cur % n) * t - 1, Math.floor(cur / n) * t - 1, t + 1, t + 1);
+
                 r += deltaR;
                 g += deltaG;
                 b += deltaB;
+                
                 const nc = (colorCounter + 1) % len;
                 if(Maze.colorExceeds(r, colorArr[nc][0], deltaR) ||
                 Maze.colorExceeds(g, colorArr[nc][1], deltaG) ||
                 Maze.colorExceeds(b, colorArr[nc][1], deltaB)){
                     colorCounter = nc;
                     const nnc = (nc + 1) % len;
+                    r = colorArr[nc][0]
+                    g = colorArr[nc][1]
+                    b = colorArr[nc][2]
                     deltaR = rate * (colorArr[nnc][0] - r) / (n * 25);
                     deltaG = rate * (colorArr[nnc][1] - g) / (n * 25);
                     deltaB = rate * (colorArr[nnc][2] - b) / (n * 25);
@@ -343,8 +348,6 @@ class Maze{
 
 
 class MaskImage{
-    
-
     constructor(image, height, width, n, thresh){
         this.height = height;
         this.width = width;
@@ -394,6 +397,7 @@ function insideImageMask(i, n, ratio, offset){
 const meta = {
     width: 700,
     height: 700,
+    maze: null,
     created: false
 };
 
@@ -454,17 +458,28 @@ function initiate() {
     ctx.font = '96px serif';
     ctx.strokeText('Create your maze', 50, 400, 500);
     ctx.strokeRect(0, 0, 700, 700);
-
-    // $('#sizeRange').hide();
-    $('#addColor').show();
-    $('#winMessage').hide();
 }
 
-function addColor() {
+function addColor(r, g, b) {
+    let color;
+    if(r && g && b){
+        r = Math.floor(r * 255).toString(16);
+        g = Math.floor(g * 255).toString(16);
+        b = Math.floor(b * 255).toString(16);
+        color = `#${r}${g}${b}`;
+    } else {
+        color = document.getElementById('sc').value;
+    }
     const col = document.createElement('input');
     col.type = 'color';
     col.className = 'mr-1';
     col.name = 'colorInput';
+    col.value = color;
+    col.onchange = () => {
+        if(meta.created){
+            renderMaze(meta.maze);
+        }
+    }
 
     const div = document.createElement('div');
     div.className = 'mb-1';
@@ -472,7 +487,11 @@ function addColor() {
 
     const del = document.createElement('button');
     del.innerHTML = 'Delete';
-    del.onclick = () => deleteColor(div.id);
+
+    del.onclick = () => {
+        deleteColor(div.id); 
+        if(meta.created) renderMaze(meta.maze);
+    };
 
     div.appendChild(col);
     div.appendChild(del);
@@ -484,6 +503,24 @@ function addColor() {
 function deleteColor(id){
     const board = document.getElementById('colorBoard');
     board.removeChild(document.getElementById(id));
+}
+
+function renderMaze(maze){
+    const colored = document.getElementById('color').checked;
+    const colorInputs = document.getElementsByName('colorInput');
+    const colors = [];
+    for (const c of colorInputs) {
+        colors.push(c.value);
+    }
+    const rate = document.getElementById('colorRate').value;
+    const ctx = document.getElementById('canvas').getContext('2d');
+
+    ctx.clearRect(0, 0, meta.width, meta.height);
+
+    if (colored) {
+        maze.renderColor(ctx, colors, rate);
+    }
+    maze.render(ctx);
 }
 
 function createMaze(){
@@ -503,24 +540,11 @@ function createMaze(){
         func = insideImageMask;
     }
 
-    const colored = document.getElementById('color').checked;
-    const colorInputs = document.getElementsByName('colorInput');
-    const colors = [];
-    for(const c of colorInputs){
-        colors.push(c.value);
-    }
-    const rate = document.getElementById('colorRate').value;
-
     const maze = new Maze(n, false, shape, size, func);
-    const ctx = document.getElementById('canvas').getContext('2d');
 
-    ctx.clearRect(0, 0, meta.width, meta.height);
+    renderMaze(maze);
 
-    if(colored){
-        maze.renderColor(ctx, colors, rate);
-    }
-    maze.render(ctx);
-
+    meta.maze = maze;
     meta.created = true;
 }
 
