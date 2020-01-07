@@ -14,12 +14,12 @@
 <body onkeydown="update(event)">
     <div class="container mt-4">
         <div class="row">
-            <div class="col-sm">
-                <ul class="list-group mt-4">
+            <div class="col-sm-4">
+                <ul class="list-group">
                     <li class="list-group-item"><input type="checkbox" id="color" checked
                             onchange="showAndHideColorBlocks()">Colored</li>
                     <li class="colorSelection list-group-item">
-                        Rate of change <input id="colorRange" class="ml-4" onchange="if(created){render();}"
+                        Rate of change <input id="colorRate" class="ml-4" onchange="if(created){render();}"
                             type="range" title="rate of change of color (responsive)"><br>
                         <input id="option1" type="radio" onchange="showAddColor()" checked name="option"><label
                             for="option1"> Arbitrary Color </label>
@@ -29,7 +29,7 @@
                     <li id="colorBoard" class="colorSelection list-group-item">
                         <div id="addColor"><button class="btn btn-primary mb-1" onclick="addColor()">Add more
                                 colors</button><br></div>
-                        <input id="colorInput" class="mb-1" title="change color (responsive)" type="color"
+                        <input class="mb-1" name="colorInput" title="change color (responsive)" type="color"
                             value="#f07070" onchange="if(created){render();}">
                         Choose color
                     </li>
@@ -96,7 +96,7 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
     <!-- <script src="render.js?version=1"></script> -->
-    <script src="Maze.js?version=3"></script>
+    <script src="Maze.js?version=4"></script>
 </body>
 
 </html>

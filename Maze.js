@@ -3,13 +3,15 @@ class Maze{
         this.N = n;
         this.record = null,
         this.shapeSize = shapeSize;
-        this.colorRecord = null;
-        this.colored = colored,
         this.shape = shape, // square, heart, mask
         this.ratio = null,
         this.offset = null,
         this.start = null,
         this.maskFunc = maskFunc;
+
+        //color
+        this.colorRecord = null;
+        this.colored = colored;
 
         // game information
         this.onGame = false;
@@ -78,10 +80,10 @@ class Maze{
             for (let i = 0; i < n * n; i++) {
                 if(!this.maskFunc(i, n, ratio, offset)){
                     adjList[i] = [];
-                    continue;
-                }
-                counter++;
-                adjList[i] =  this.makeAdjList(this.neighbors(i));     
+                }else{
+                    counter++;
+                    adjList[i] = this.makeAdjList(this.neighbors(i)); 
+                }       
             }
         }
 
@@ -91,17 +93,9 @@ class Maze{
             record[i] = [-1, -1, -1, -1];
         }
 
-        // pick a random node
-        // let start = Math.floor(Math.random() * n * n) % (n * n);
-
-        // while(this.shape !== 'square' && !this.maskFunc(start, n, ratio, offset)){
-        //     start = Math.floor(Math.random() * n * n) % (n * n);
-        // }
-
         const knownNodes = new Uint8Array(n * n);
         const visited = new Uint8Array(n * n);
         const starts = [];
-        // knownNodes[start] = 1;
 
         console.time('spanning tree generation');
 
@@ -158,7 +152,6 @@ class Maze{
             }
         }
 
-        
         console.timeEnd('spanning tree generation');
 
         this.record = record;
@@ -189,16 +182,60 @@ class Maze{
         return [r, g, b];
     }
 
-    renderColor(ctx, colorOption, colors){
+    renderColor(ctx, colors, rate){
+        const n = this.N;
+
         if(colors.length === 1 && this.shape === 'square'){
             const [r, g, b] = Maze.RGB(colors[0]);
             ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
             ctx.fillRect(0, 0, meta.width, meta.height);
+            return;
         }
+        const colorArr = colors.map(x => Maze.RGB(x));
+        const colorRecord = new Array(n * n);
+        colorRecord.fill([255, 255, 255])
+        for(const start of this.start){
+            let colorCounter = 0;
+            const len = colors.length;
+            const t = 700 / n;
+            let [r, g, b] = colorArr[0];
+            let deltaR = rate * (colorArr[(colorCounter + 1) % len][0] - r) / (n * 25);
+            let deltaG = rate * (colorArr[(colorCounter + 1) % len][1] - g) / (n * 25);
+            let deltaB = rate * (colorArr[(colorCounter + 1) % len][2] - b) / (n * 25);
+
+            const stack = [start];
+            const visited = new Int8Array(n * n);
+            let cur = start;
+            while(stack.length !== 0){
+                cur = stack.pop();
+                visited[cur] = 1;
+                stack.push(...(this.record[cur].filter(x => x !== -1 && !visited[x])));
+                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                colorRecord[cur] = ['rgb', r, g, b];
+                ctx.fillRect((cur % n) * t - 1, Math.floor(cur / n) * t - 1, t + 1, t + 1);
+                r += deltaR;
+                g += deltaG;
+                b += deltaB;
+                const nc = (colorCounter + 1) % len;
+                if(Maze.colorExceeds(r, colorArr[nc][0], deltaR) ||
+                Maze.colorExceeds(g, colorArr[nc][1], deltaG) ||
+                Maze.colorExceeds(b, colorArr[nc][1], deltaB)){
+                    colorCounter = nc;
+                    const nnc = (nc + 1) % len;
+                    deltaR = rate * (colorArr[nnc][0] - r) / (n * 25);
+                    deltaG = rate * (colorArr[nnc][1] - g) / (n * 25);
+                    deltaB = rate * (colorArr[nnc][2] - b) / (n * 25);
+                }
+            }
+        }
+        this.colorRecord = colorRecord;
+    }
+
+    static colorExceeds(c1, c2, delta){
+        return (c1 >= c2 && delta > 0) || (c1 <= c2 && delta < 0) || c1 === c2;
     }
 
     render(ctx){
-        ctx.clearRect(0, 0, meta.width, meta.height);
         const n = this.N, record = this.record;
         const ratio = this.ratio, offset = this.offset;
         const t = 700 / n;
@@ -423,6 +460,32 @@ function initiate() {
     $('#winMessage').hide();
 }
 
+function addColor() {
+    const col = document.createElement('input');
+    col.type = 'color';
+    col.className = 'mr-1';
+    col.name = 'colorInput';
+
+    const div = document.createElement('div');
+    div.className = 'mb-1';
+    div.id = '' + performance.now();
+
+    const del = document.createElement('button');
+    del.innerHTML = 'Delete';
+    del.onclick = () => deleteColor(div.id);
+
+    div.appendChild(col);
+    div.appendChild(del);
+    
+    const board = document.getElementById('colorBoard');
+    board.appendChild(div);
+}
+
+function deleteColor(id){
+    const board = document.getElementById('colorBoard');
+    board.removeChild(document.getElementById(id));
+}
+
 function createMaze(){
     const n = parseInt(document.getElementById('rows').value);
     const shapes = document.getElementsByName('shape');
@@ -440,8 +503,22 @@ function createMaze(){
         func = insideImageMask;
     }
 
+    const colored = document.getElementById('color').checked;
+    const colorInputs = document.getElementsByName('colorInput');
+    const colors = [];
+    for(const c of colorInputs){
+        colors.push(c.value);
+    }
+    const rate = document.getElementById('colorRate').value;
+
     const maze = new Maze(n, false, shape, size, func);
     const ctx = document.getElementById('canvas').getContext('2d');
+
+    ctx.clearRect(0, 0, meta.width, meta.height);
+
+    if(colored){
+        maze.renderColor(ctx, colors, rate);
+    }
     maze.render(ctx);
 
     meta.created = true;
